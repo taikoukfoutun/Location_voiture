@@ -1,301 +1,389 @@
 import { useState } from 'react';
 import { registerUser } from '../db';
-import myCar from '../assets/car.jpeg';
+import luxuryCarBg from '../assets/luxury_coastal_car.jpg';
 
 const registerStyles = `
   .auth-card-split {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
     background: #ffffff;
     border-radius: 28px;
-    padding: 14px;
     width: 100%;
-    max-width: 1080px;
-    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.12), 0 0 1px 1px rgba(0, 0, 0, 0.04);
-    align-items: stretch;
+    max-width: 1100px;
+    box-shadow: 0 25px 65px -15px rgba(15, 23, 42, 0.1), 0 0 1px 1px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    min-height: 640px;
   }
 
-  /* Left Side: Dark Obsidian Luxury Car Showcase */
-  .visual-sidebar {
-    flex: 1.05;
-    background: radial-gradient(circle at 50% 40%, #161424 0%, #0d0c14 55%, #050507 100%);
-    border-radius: 20px;
-    padding: 28px 26px;
+  @media (max-width: 960px) {
+    .auth-card-split {
+      grid-template-columns: 1fr;
+      max-width: 520px;
+    }
+  }
+
+  /* ================= LEFT SIDE: BRAND SHOWCASE ================= */
+  .brand-showcase {
+    position: relative;
+    background-image: url('${luxuryCarBg}');
+    background-size: cover;
+    background-position: center bottom;
+    padding: 38px 36px 32px 36px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    min-height: 500px;
+    min-height: 520px;
   }
 
-  /* Ambient light decorations */
-  .visual-sidebar::before {
+  .brand-showcase::before {
     content: '';
     position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 220px;
-    height: 220px;
-    background: radial-gradient(circle, rgba(236, 72, 153, 0.14) 0%, transparent 70%);
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(255, 255, 255, 0.72) 40%,
+      rgba(255, 255, 255, 0.25) 65%,
+      rgba(255, 255, 255, 0.88) 100%
+    );
     pointer-events: none;
+    z-index: 1;
   }
 
-  .visual-sidebar::after {
-    content: '';
-    position: absolute;
-    bottom: -60px;
-    left: -60px;
-    width: 240px;
-    height: 240px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .sidebar-header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 0.35rem 0.85rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.8px;
-    color: #e2e8f0;
-    width: fit-content;
+  .showcase-content {
+    position: relative;
     z-index: 2;
   }
 
-  .badge-pulse {
+  .fleet-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 0.35rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: #475569;
+    text-transform: uppercase;
+  }
+
+  .dot-indicator {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #ec4899;
-    box-shadow: 0 0 8px #ec4899;
+    background: #10b981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
   }
 
-  /* Big Fitted Car Display Stage (Seamless Black, No Border) */
-  .car-display-stage {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 1.4rem 0;
-    z-index: 2;
-    width: 100%;
-  }
-
-  .car-glow-backdrop {
-    position: absolute;
-    width: 90%;
-    height: 75%;
-    background: radial-gradient(ellipse, rgba(244, 114, 182, 0.24) 0%, rgba(99, 102, 241, 0.14) 50%, transparent 75%);
-    filter: blur(28px);
-    pointer-events: none;
-  }
-
-  .hero-car-image {
-    width: 100%;
-    max-width: 440px;
-    height: auto;
-    object-fit: contain;
-    display: block;
-    position: relative;
-    z-index: 2;
-    filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.85));
-    transition: transform 0.35s ease;
-  }
-
-  .hero-car-image:hover {
-    transform: scale(1.04) translateY(-2px);
-  }
-
-  /* Specs Badges */
-  .car-specs-row {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    z-index: 2;
-  }
-
-  .spec-pill {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    padding: 0.3rem 0.65rem;
-    border-radius: 8px;
-    font-size: 0.73rem;
-    font-weight: 600;
-    color: #cbd5e1;
-    letter-spacing: 0.3px;
-  }
-
-  /* Encouraging Words at Bottom */
-  .sidebar-footer {
-    z-index: 2;
-  }
-
-  .sidebar-subtag {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #ec4899;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 0.35rem;
-  }
-
-  .sidebar-heading {
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: #ffffff;
-    line-height: 1.35;
-    margin: 0;
-    letter-spacing: -0.3px;
-  }
-
-  /* Right Side: Form Area */
-  .form-panel {
-    flex: 1.15;
-    padding: 24px 46px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .form-header h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
+  .showcase-headline {
+    font-size: 2.2rem;
+    font-weight: 800;
     color: #0f172a;
-    margin: 0 0 0.25rem 0;
-    letter-spacing: -0.4px;
+    line-height: 1.18;
+    margin-top: 14px;
+    margin-bottom: 8px;
+    letter-spacing: -0.6px;
   }
 
-  .form-header p {
-    font-size: 0.88rem;
-    color: #64748b;
-    line-height: 1.45;
-    margin: 0 0 1.15rem 0;
+  .showcase-description {
+    font-size: 0.92rem;
+    color: #334155;
+    line-height: 1.5;
+    max-width: 440px;
+    margin-bottom: 16px;
   }
 
-  .form-group {
-    margin-bottom: 0.85rem;
+  .feature-pills {
     display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    text-align: left;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
   }
 
-  .form-group label {
-    font-size: 0.85rem;
+  .feature-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.78rem;
     font-weight: 600;
     color: #1e293b;
   }
 
-  .form-group input {
-    width: 100%;
-    padding: 0.68rem 0.95rem;
-    border-radius: 9px;
+  .privilege-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 25px -5px rgba(0, 82, 255, 0.08);
+    margin-bottom: 12px;
+  }
+
+  .privilege-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #0052FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .privilege-content .privilege-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #0052FF;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+
+  .privilege-content .privilege-text {
+    font-size: 0.78rem;
+    color: #334155;
+    font-weight: 500;
+    margin-top: 1px;
+  }
+
+  .testimonial-card {
     background: #ffffff;
-    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 14px 18px;
+    box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(226, 232, 240, 0.85);
+  }
+
+  .testimonial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+  }
+
+  .rating-stars {
+    color: #0052FF;
+    font-weight: 700;
+  }
+
+  .rating-score {
     color: #0f172a;
-    font-size: 0.92rem;
-    outline: none;
+    font-weight: 800;
+    margin-left: 2px;
+  }
+
+  .rating-cities {
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  .testimonial-quote {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #334155;
+    line-height: 1.45;
+    margin-bottom: 8px;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .author-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #0052FF;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .author-info {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  /* ================= RIGHT SIDE: FORM ================= */
+  .form-panel {
+    background: #ffffff;
+    padding: 38px 38px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 1px solid #f1f5f9;
+  }
+
+  .form-header {
+    margin-bottom: 16px;
+  }
+
+  .driver-access-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #0052FF;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .form-header h2 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .form-header p {
+    color: #64748b;
+    font-size: 0.86rem;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 5px;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-wrapper input {
+    width: 100%;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #0f172a;
+    font-family: inherit;
     transition: all 0.2s ease;
   }
 
-  .form-group input:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  .input-wrapper input:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: #0052FF;
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
   }
 
   .error-text {
+    display: block;
     color: #ef4444;
     font-size: 0.78rem;
+    margin-top: 4px;
+    font-weight: 500;
   }
 
-  .alert-box {
-    padding: 0.65rem 0.9rem;
-    border-radius: 9px;
-    font-size: 0.85rem;
-    margin-bottom: 0.95rem;
+  .submit-drive-btn {
+    width: 100%;
+    padding: 12px 18px;
+    background: #0052FF;
+    border: none;
+    color: #ffffff;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 22px -5px rgba(0, 82, 255, 0.42);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-
-  .alert-error {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
-  }
-
-  .alert-success {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #15803d;
-  }
-
-  .submit-button {
-    width: 100%;
-    padding: 0.82rem;
-    background: #4f46e5;
-    border: none;
-    border-radius: 10px;
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 0.92rem;
-    cursor: pointer;
-    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.45);
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
     transition: all 0.2s ease;
-    margin-top: 0.35rem;
   }
 
-  .submit-button:hover:not(:disabled) {
-    background: #4338ca;
+  .submit-drive-btn:hover {
+    background: #0043D6;
     transform: translateY(-1px);
-    box-shadow: 0 14px 24px -5px rgba(79, 70, 229, 0.5);
+    box-shadow: 0 14px 26px -5px rgba(0, 82, 255, 0.5);
   }
 
-  .submit-button:disabled {
+  .submit-drive-btn:disabled {
     opacity: 0.65;
     cursor: not-allowed;
   }
 
-  .switch-footer {
-    margin-top: 1.3rem;
+  .switch-signup {
     text-align: center;
-    font-size: 0.85rem;
+    margin-top: 18px;
+    font-size: 0.84rem;
     color: #64748b;
   }
 
-  .switch-link {
+  .signup-link-btn {
     background: none;
     border: none;
-    color: #4f46e5;
-    font-weight: 600;
+    color: #0052FF;
+    font-weight: 700;
+    margin-left: 4px;
     cursor: pointer;
-    text-decoration: underline;
-    margin-left: 0.35rem;
+    font-size: 0.84rem;
   }
 
-  @media (max-width: 860px) {
-    .auth-card-split {
-      flex-direction: column;
-    }
-    .visual-sidebar {
-      min-height: 320px;
-      padding: 22px;
-    }
-    .form-panel {
-      padding: 24px 18px;
-    }
+  .signup-link-btn:hover {
+    text-decoration: underline;
+  }
+
+  .alert-banner {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .alert-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+
+  .alert-success {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
   }
 `;
 
-export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
+function Register({ onRegisterSuccess, onSwitchToLogin }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -332,7 +420,6 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
       });
 
       setSuccessMsg(data.message || 'Account created successfully!');
-
       if (data.user) {
         setTimeout(() => {
           onRegisterSuccess(data.user);
@@ -352,50 +439,81 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
     <>
       <style>{registerStyles}</style>
       <div className="auth-card-split">
-        {/* Left Visual Sidebar (Dark Luxury Car Showcase) */}
-        <div className="visual-sidebar">
-          {/* Top Decorative Badge */}
-          <div className="sidebar-header-badge">
-            <span className="badge-pulse"></span>
-            <span>GT3 RS • EXCLUSIVE FLEET</span>
-          </div>
+        {/* ================= LEFT SIDE: BRAND SHOWCASE ================= */}
+        <div className="brand-showcase">
+          <div className="showcase-content">
+            <div className="fleet-badge">
+              <span className="dot-indicator"></span>
+              <span>Fleet Access Portal</span>
+            </div>
 
-          {/* Big Fitted Car Display Stage */}
-          <div className="car-display-stage">
-            <div className="car-glow-backdrop"></div>
-            <img src={myCar} alt="Porsche 911 GT3 RS" className="hero-car-image" />
-            <div className="car-specs-row">
-              <span className="spec-pill">⚡ 525 HP</span>
-              <span className="spec-pill">⏱ 0-100: 3.2s</span>
-              <span className="spec-pill">🏁 Track Edition</span>
+            <h1 className="showcase-headline">Unlock the Open Road.</h1>
+            <p className="showcase-description">
+              Experience pristine luxury, electric performance, and seamless instant keyless booking
+              with zero waiting lines.
+            </p>
+
+            <div className="feature-pills">
+              <span className="feature-pill">📱 Instant Keyless Mobile Unlock</span>
+              <span className="feature-pill">📅 Free Cancellation up to 24h</span>
+              <span className="feature-pill">🛡️ Fully Insured & 24/7 VIP Concierge</span>
             </div>
           </div>
 
-          {/* Encouraging Words */}
-          <div className="sidebar-footer">
-            <div className="sidebar-subtag">Exclusive Collection</div>
-            <h3 className="sidebar-heading">
-              Unlock the best vehicles for your next journey in just a few clicks
-            </h3>
+          <div className="showcase-content">
+            <div className="privilege-banner">
+              <div className="privilege-icon">⚡</div>
+              <div className="privilege-content">
+                <div className="privilege-tag">Privilege Tier</div>
+                <div className="privilege-text">
+                  Members receive 15% off first weekend rental + complimentary Supercharging.
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div className="testimonial-header">
+                <span className="rating-stars">
+                  ★★★★★ <span className="rating-score">4.98 / 5</span>
+                </span>
+                <span className="rating-cities">120,000+ Drivers Across 45 Cities</span>
+              </div>
+              <p className="testimonial-quote">
+                &ldquo;Smoothest rental process ever created. Booked on departure, unlocked the
+                Taycan at the airport bay in under 30 seconds.&rdquo;
+              </p>
+              <div className="testimonial-author">
+                <div className="author-avatar">M</div>
+                <span className="author-info">Marcus V. — Verified Club Member, Zurich</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right Form Panel */}
+        {/* ================= RIGHT SIDE: FORM ================= */}
         <div className="form-panel">
           <div className="form-header">
-            <h2>Create an account</h2>
-            <p>Access your fleet, bookings, and rentals anytime — keep everything moving in one place.</p>
+            <div className="driver-access-tag">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.04 3H5.81l1.04-3zM19 17H5v-4.66l.12-.34h13.77l.11.34V17z" />
+                <circle cx="7.5" cy="14.5" r="1.5" />
+                <circle cx="16.5" cy="14.5" r="1.5" />
+              </svg>
+              <span>Driver Registration</span>
+            </div>
+            <h2>Join Veloce Drive</h2>
+            <p>Create your verified account in under 2 minutes and unlock our exclusive fleet.</p>
           </div>
 
           {errorMsg && (
-            <div className="alert-box alert-error">
+            <div className="alert-banner alert-error">
               <span>⚠️</span>
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="alert-box alert-success">
+            <div className="alert-banner alert-success">
               <span>✅</span>
               <span>{successMsg}</span>
             </div>
@@ -404,71 +522,80 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
           <form onSubmit={handleSubmit} noValidate>
             <div className="form-group">
               <label htmlFor="reg-name">Full Name</label>
-              <input
-                id="reg-name"
-                name="name"
-                type="text"
-                placeholder="e.g. John Doe"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-wrapper">
+                <input
+                  id="reg-name"
+                  name="name"
+                  type="text"
+                  placeholder="e.g. Alex Chen"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
               {fieldErrors.name && <span className="error-text">{fieldErrors.name[0]}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="reg-email">Your email</label>
-              <input
-                id="reg-email"
-                name="email"
-                type="email"
-                placeholder="name@company.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+              <label htmlFor="reg-email">Email Address</label>
+              <div className="input-wrapper">
+                <input
+                  id="reg-email"
+                  name="email"
+                  type="email"
+                  placeholder="alex.chen@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
               {fieldErrors.email && <span className="error-text">{fieldErrors.email[0]}</span>}
             </div>
 
             <div className="form-group">
               <label htmlFor="reg-password">Password</label>
-              <input
-                id="reg-password"
-                name="password"
-                type="password"
-                placeholder="••••••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-wrapper">
+                <input
+                  id="reg-password"
+                  name="password"
+                  type="password"
+                  placeholder="Minimum 6 characters"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
               {fieldErrors.password && <span className="error-text">{fieldErrors.password[0]}</span>}
             </div>
 
             <div className="form-group">
               <label htmlFor="reg-confirm">Confirm Password</label>
-              <input
-                id="reg-confirm"
-                name="password_confirmation"
-                type="password"
-                placeholder="••••••••••••"
-                value={formData.password_confirmation}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-wrapper">
+                <input
+                  id="reg-confirm"
+                  name="password_confirmation"
+                  type="password"
+                  placeholder="Repeat your password"
+                  value={formData.password_confirmation}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
               {fieldErrors.password_confirmation && (
                 <span className="error-text">{fieldErrors.password_confirmation[0]}</span>
               )}
             </div>
 
-            <button type="submit" className="submit-button" disabled={loading}>
-              {loading ? 'Creating Account...' : 'Get Started'}
+            <button type="submit" className="submit-drive-btn" disabled={loading}>
+              <span>{loading ? 'Creating Account...' : 'Complete Driver Registration'}</span>
+              <span>➔</span>
             </button>
           </form>
 
-          <div className="switch-footer">
+          <div className="switch-signup">
             Already have an account?
-            <button type="button" className="switch-link" onClick={onSwitchToLogin}>
-              Sign In
+            <button type="button" className="signup-link-btn" onClick={onSwitchToLogin}>
+              Sign In to Drive
             </button>
           </div>
         </div>
@@ -476,3 +603,5 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
     </>
   );
 }
+
+export default Register;

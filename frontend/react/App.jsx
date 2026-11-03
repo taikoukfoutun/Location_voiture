@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import Login from './components/Login';
 import Register from './components/Register';
+import AdminDashboard from './components/AdminDashboard';
+import UserDashboard from './components/UserDashboard';
 import { getStoredUser, setStoredUser, logoutUser } from './db';
 
 const appStyles = `
@@ -29,6 +31,13 @@ const appStyles = `
     align-items: center;
     justify-content: center;
     padding: 2.5rem 1rem;
+  }
+
+  .app-container.admin-mode {
+    display: block;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
   }
 
   /* Simple clean home view after login */
@@ -105,18 +114,13 @@ function App() {
   return (
     <>
       <style>{appStyles}</style>
-      <div className="app-container">
+      <div className={`app-container ${user?.role === 'admin' ? 'admin-mode' : ''}`}>
         {user ? (
-          <div className="home-screen">
-            <div className="user-avatar">
-              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-            </div>
-            <h1>Welcome, {user.name}!</h1>
-            <p>You are logged in with {user.email}.</p>
-            <button className="logout-btn" onClick={handleLogout}>
-              Sign Out
-            </button>
-          </div>
+          user.role === 'admin' ? (
+            <AdminDashboard user={user} onLogout={handleLogout} />
+          ) : (
+            <UserDashboard user={user} onLogout={handleLogout} />
+          )
         ) : isRegisterView ? (
           <Register
             onRegisterSuccess={handleAuthSuccess}

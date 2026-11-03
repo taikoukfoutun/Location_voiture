@@ -40,6 +40,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'user',
         ]);
 
         return response()->json([
@@ -49,6 +50,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role ?? 'user',
                 'created_at' => $user->created_at,
             ]
         ], 201);
@@ -92,6 +94,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role ?? 'user',
             ]
         ]);
     }
