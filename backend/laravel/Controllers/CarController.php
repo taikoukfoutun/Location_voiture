@@ -17,9 +17,42 @@ class CarController extends Controller
     {
         $path = base_path('../frontend/react/assets/cars');
         if (!file_exists($path)) {
-            mkdir($path, 0755, true);
+            @mkdir($path, 0777, true);
         }
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            @exec('attrib -R "' . str_replace('/', '\\', $path) . '"');
+        }
+        @chmod($path, 0777);
+        clearstatcache(true, $path);
         return realpath($path) ?: $path;
+    }
+
+    /**
+     * Safely save uploaded car image, with fallback for Windows / OneDrive permissions.
+     */
+    protected function saveUploadedCarImage($file, string $targetDir, string $fileName): void
+    {
+        if (!file_exists($targetDir)) {
+            @mkdir($targetDir, 0777, true);
+        }
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            @exec('attrib -R "' . str_replace('/', '\\', $targetDir) . '"');
+        }
+        @chmod($targetDir, 0777);
+        clearstatcache(true, $targetDir);
+
+        try {
+            $file->move($targetDir, $fileName);
+        } catch (\Throwable $e) {
+            // Fallback: direct copy / move for Windows NTFS / OneDrive where Symfony's is_writable() check can fail
+            $dest = rtrim($targetDir, '/\\') . DIRECTORY_SEPARATOR . $fileName;
+            $source = $file->getRealPath() ?: $file->getPathname();
+            if (@copy($source, $dest) || @move_uploaded_file($source, $dest)) {
+                @chmod($dest, 0666);
+                return;
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -90,7 +123,7 @@ class CarController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = 'car_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($this->getAssetsCarsPath(), $fileName);
+            $this->saveUploadedCarImage($file, $this->getAssetsCarsPath(), $fileName);
             $data['image'] = '/react/assets/cars/' . $fileName;
         } elseif ($request->filled('image_preset')) {
             $data['image'] = $request->image_preset;
@@ -178,7 +211,7 @@ class CarController extends Controller
 
             $file = $request->file('image');
             $fileName = 'car_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($this->getAssetsCarsPath(), $fileName);
+            $this->saveUploadedCarImage($file, $this->getAssetsCarsPath(), $fileName);
             $data['image'] = '/react/assets/cars/' . $fileName;
         } else {
             // Retain existing image if not replacing

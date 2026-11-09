@@ -12,6 +12,26 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    const ROLE_ADMIN = 'admin';
+    const ROLE_GESTIONNAIRE = 'gestionnaire';
+    const ROLE_CLIENT = 'client';
+    const ROLE_USER = 'user';
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isGestionnaire(): bool
+    {
+        return $this->role === self::ROLE_GESTIONNAIRE;
+    }
+
+    public function isStaff(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_GESTIONNAIRE]);
+    }
+
     /**
      * The attributes that are mass assignable.
      *

@@ -3,6 +3,7 @@
 use App\DbBridge;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\GestionnaireController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +26,9 @@ Route::get('/cars/{id}', [CarController::class, 'show']);
 Route::post('/cars/{id}', [CarController::class, 'update']);
 Route::match(['put', 'patch'], '/cars/{id}', [CarController::class, 'update']);
 Route::delete('/cars/{id}', [CarController::class, 'destroy']);
+
+// Gestionnaires Management Routes (Super Admin)
+Route::get('/admin/gestionnaires', [GestionnaireController::class, 'index']);
+Route::post('/admin/gestionnaires', [GestionnaireController::class, 'store']);
+Route::put('/admin/gestionnaires/{id}', [GestionnaireController::class, 'update']);
+Route::delete('/admin/gestionnaires/{id}', [GestionnaireController::class, 'destroy']);

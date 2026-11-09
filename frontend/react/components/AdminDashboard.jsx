@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { getCars, createCar, updateCar, deleteCar } from '../db';
+import {
+  getCars,
+  createCar,
+  updateCar,
+  deleteCar,
+  getGestionnaires,
+  createGestionnaire,
+  updateGestionnaire,
+  deleteGestionnaire,
+} from '../db';
 import defaultCarBg from '../assets/luxury_coastal_car.jpg';
 
 const adminDashboardStyles = `
@@ -24,7 +33,7 @@ const adminDashboardStyles = `
     border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 18px 28px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.04);
   }
 
@@ -111,6 +120,57 @@ const adminDashboardStyles = `
     background: #0f172a;
     color: #ffffff;
     border-color: #0f172a;
+  }
+
+  /* Admin Mode Tab Switcher */
+  .admin-tabs-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    width: fit-content;
+    border: 1px solid #e2e8f0;
+  }
+
+  .admin-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .admin-tab-btn:hover {
+    color: #0f172a;
+  }
+
+  .admin-tab-btn.active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  }
+
+  .admin-tab-count {
+    background: #e2e8f0;
+    color: #334155;
+    font-size: 0.72rem;
+    padding: 2px 7px;
+    border-radius: 9999px;
+  }
+
+  .admin-tab-btn.active .admin-tab-count {
+    background: #0f172a;
+    color: #ffffff;
   }
 
   /* Global Feedback Alert */
@@ -314,8 +374,98 @@ const adminDashboardStyles = `
   }
 
   /* =========================================================
+     GESTIONNAIRES STAFF CARDS GRID
+     ========================================================= */
+
+  .gestionnaires-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 640px) {
+    .gestionnaires-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .gest-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .gest-card:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+    box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.08);
+  }
+
+  .gest-header-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .gest-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #0f172a;
+    font-weight: 800;
+  }
+
+  .gest-info h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.3px;
+    margin: 0 0 4px 0;
+  }
+
+  .gest-info p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .gest-meta-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid #eef2f6;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+
+  .gest-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  /* =========================================================
      BIG VEHICLE CARDS SHOWCASE GRID
-     Expansive, editorial car cards with high-res hero framing
      ========================================================= */
 
   .fleet-cards-grid {
@@ -911,7 +1061,13 @@ const adminDashboardStyles = `
   }
 `;
 
-function AdminDashboard({ user, onLogout }) {
+function AdminDashboard({ user, onLogout, onBackToFleet }) {
+  const isAdmin = user?.role === 'admin';
+
+  // Navigation Tab State (Super Admin can toggle between Gestionnaires and Fleet)
+  const [activeTab, setActiveTab] = useState(isAdmin ? 'gestionnaires' : 'fleet');
+
+  // Fleet / Cars State
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -919,13 +1075,13 @@ function AdminDashboard({ user, onLogout }) {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [alert, setAlert] = useState(null);
 
-  // Modal State
+  // Car Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
+  const [modalMode, setModalMode] = useState('add');
   const [currentCarId, setCurrentCarId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form Fields
+  // Car Form Fields
   const [formData, setFormData] = useState({
     brand: '',
     model: '',
@@ -945,12 +1101,35 @@ function AdminDashboard({ user, onLogout }) {
   const [imagePreset, setImagePreset] = useState('');
   const fileInputRef = useRef(null);
 
-  // Delete Safeguard Modal State
+  // Delete Safeguard Modal State for Car
   const [carToDelete, setCarToDelete] = useState(null);
+
+  // =========================================================
+  // GESTIONNAIRES STAFF MANAGEMENT STATE (SUPER ADMIN)
+  // =========================================================
+  const [gestionnaires, setGestionnaires] = useState([]);
+  const [loadingGestionnaires, setLoadingGestionnaires] = useState(false);
+  const [gestSearch, setGestSearch] = useState('');
+  const [isGestModalOpen, setIsGestModalOpen] = useState(false);
+  const [gestModalMode, setGestModalMode] = useState('add');
+  const [currentGestId, setCurrentGestId] = useState(null);
+  const [gestSubmitting, setGestSubmitting] = useState(false);
+  const [gestFormData, setGestFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+  const [gestToDelete, setGestToDelete] = useState(null);
 
   useEffect(() => {
     loadFleet();
   }, [statusFilter, categoryFilter]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadGestionnaires();
+    }
+  }, [gestSearch]);
 
   const loadFleet = async () => {
     setLoading(true);
@@ -968,12 +1147,30 @@ function AdminDashboard({ user, onLogout }) {
     }
   };
 
+  const loadGestionnaires = async () => {
+    if (!isAdmin) return;
+    setLoadingGestionnaires(true);
+    try {
+      const data = await getGestionnaires({ search: gestSearch.trim() });
+      setGestionnaires(data);
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Error loading gestionnaires.' });
+    } finally {
+      setLoadingGestionnaires(false);
+    }
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     loadFleet();
   };
 
-  // Open modal for Adding
+  const handleGestSearchSubmit = (e) => {
+    e.preventDefault();
+    loadGestionnaires();
+  };
+
+  // Car Modal Actions
   const handleOpenAdd = () => {
     setModalMode('add');
     setCurrentCarId(null);
@@ -996,7 +1193,6 @@ function AdminDashboard({ user, onLogout }) {
     setIsModalOpen(true);
   };
 
-  // Open modal for Editing
   const handleOpenEdit = (car) => {
     setModalMode('edit');
     setCurrentCarId(car.id);
@@ -1075,11 +1271,9 @@ function AdminDashboard({ user, onLogout }) {
     }
   };
 
-  // Safe Delete Action
   const confirmDelete = async () => {
     if (!carToDelete) return;
 
-    // Frontend Safeguard Check
     if (carToDelete.status === 'rented') {
       setAlert({
         type: 'error',
@@ -1097,6 +1291,64 @@ function AdminDashboard({ user, onLogout }) {
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'Error deleting car.' });
       setCarToDelete(null);
+    }
+  };
+
+  // =========================================================
+  // GESTIONNAIRES HANDLERS (SUPER ADMIN)
+  // =========================================================
+  const handleOpenAddGest = () => {
+    setGestModalMode('add');
+    setCurrentGestId(null);
+    setGestFormData({ name: '', email: '', password: '' });
+    setIsGestModalOpen(true);
+  };
+
+  const handleOpenEditGest = (gest) => {
+    setGestModalMode('edit');
+    setCurrentGestId(gest.id);
+    setGestFormData({ name: gest.name, email: gest.email, password: '' });
+    setIsGestModalOpen(true);
+  };
+
+  const handleGestFormChange = (e) => {
+    const { name, value } = e.target;
+    setGestFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveGest = async (e) => {
+    e.preventDefault();
+    setGestSubmitting(true);
+    setAlert(null);
+
+    try {
+      if (gestModalMode === 'add') {
+        const res = await createGestionnaire(gestFormData);
+        setAlert({ type: 'success', message: res.message || 'Gestionnaire account created successfully!' });
+      } else {
+        const res = await updateGestionnaire(currentGestId, gestFormData);
+        setAlert({ type: 'success', message: res.message || 'Gestionnaire account updated successfully!' });
+      }
+
+      setIsGestModalOpen(false);
+      loadGestionnaires();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Failed to save gestionnaire account.' });
+    } finally {
+      setGestSubmitting(false);
+    }
+  };
+
+  const confirmDeleteGest = async () => {
+    if (!gestToDelete) return;
+    try {
+      const res = await deleteGestionnaire(gestToDelete.id);
+      setAlert({ type: 'success', message: res.message || 'Gestionnaire account removed successfully.' });
+      setGestToDelete(null);
+      loadGestionnaires();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Error removing gestionnaire account.' });
+      setGestToDelete(null);
     }
   };
 
@@ -1119,15 +1371,42 @@ function AdminDashboard({ user, onLogout }) {
             <div className="admin-title-group">
               <div className="admin-kicker">
                 <span className="admin-kicker-dot"></span>
-                <span>Fleet Telemetry Console • Monaco Vault</span>
+                <span>
+                  {isAdmin
+                    ? 'Super Admin Console • Executive Administration'
+                    : 'Fleet Operations Console • Monaco Vault'}
+                </span>
               </div>
-              <h1>Fleet Overview</h1>
+              <h1>
+                {isAdmin && activeTab === 'gestionnaires'
+                  ? 'Gestionnaires Staff Overview'
+                  : 'Fleet Management Hub'}
+              </h1>
             </div>
           </div>
 
           <div className="admin-user-profile">
+            {onBackToFleet && (
+              <button
+                type="button"
+                style={{
+                  background: '#f1f5f9',
+                  border: '1px solid #cbd5e1',
+                  color: '#0f172a',
+                  padding: '7px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginRight: '8px',
+                }}
+                onClick={onBackToFleet}
+              >
+                🚗 Public Showcase
+              </button>
+            )}
             <span className="admin-badge-pill">
-              <span>👑</span>
+              <span>{isAdmin ? '👑 Super Admin' : '🏎️ Gestionnaire'}</span>
               <span>{user?.name || 'Administrator'}</span>
             </span>
             <button type="button" className="logout-pill-btn" onClick={onLogout}>
@@ -1150,213 +1429,431 @@ function AdminDashboard({ user, onLogout }) {
           </div>
         )}
 
-        {/* Fleet Metrics Strip */}
-        <section className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-card-header">
-              <h3>Total Fleet</h3>
-              <span className="stat-indicator-dot dot-total"></span>
-            </div>
-            <div className="stat-number">{String(totalCount).padStart(2, '0')}</div>
-            <div className="stat-subtext">Registered Vehicles</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-card-header">
-              <h3>Available</h3>
-              <span className="stat-indicator-dot dot-available"></span>
-            </div>
-            <div className="stat-number">{String(availableCount).padStart(2, '0')}</div>
-            <div className="stat-subtext">Immediate Dispatch</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-card-header">
-              <h3>Chartered</h3>
-              <span className="stat-indicator-dot dot-rented"></span>
-            </div>
-            <div className="stat-number">{String(rentedCount).padStart(2, '0')}</div>
-            <div className="stat-subtext">Active Client Bookings</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-card-header">
-              <h3>In Service</h3>
-              <span className="stat-indicator-dot dot-maintenance"></span>
-            </div>
-            <div className="stat-number">{String(maintenanceCount).padStart(2, '0')}</div>
-            <div className="stat-subtext">Atelier / Inspection</div>
-          </div>
-        </section>
-
-        {/* Toolbar & Filter Bar */}
-        <section className="toolbar-card">
-          <div className="filter-group">
-            <form onSubmit={handleSearchSubmit} className="search-input-wrap">
-              <span className="search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Search brand, model, license plate..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </form>
-
-            <select
-              className="select-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+        {/* Super Admin Tab Switcher */}
+        {isAdmin && (
+          <nav className="admin-tabs-nav">
+            <button
+              type="button"
+              className={`admin-tab-btn ${activeTab === 'gestionnaires' ? 'active' : ''}`}
+              onClick={() => setActiveTab('gestionnaires')}
             >
-              <option value="">All Statuses</option>
-              <option value="available">● Available</option>
-              <option value="rented">● Chartered / Rented</option>
-              <option value="maintenance">● In Service</option>
-            </select>
-
-            <select
-              className="select-filter"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              <span>👥 Staff & Gestionnaires</span>
+              <span className="admin-tab-count">{gestionnaires.length}</span>
+            </button>
+            <button
+              type="button"
+              className={`admin-tab-btn ${activeTab === 'fleet' ? 'active' : ''}`}
+              onClick={() => setActiveTab('fleet')}
             >
-              <option value="">All Categories</option>
-              <option value="Sports">Sports</option>
-              <option value="Electric">Electric</option>
-              <option value="Luxury Sedan">Luxury Sedan</option>
-              <option value="SUV">SUV</option>
-            </select>
-          </div>
+              <span>🏎️ Fleet Showcase</span>
+              <span className="admin-tab-count">{cars.length}</span>
+            </button>
+          </nav>
+        )}
 
-          <button type="button" className="add-car-btn" onClick={handleOpenAdd}>
-            <span>+ Add New Vehicle</span>
-          </button>
-        </section>
+        {/* =========================================================
+            VIEW 1: GESTIONNAIRES MANAGEMENT (SUPER ADMIN ONLY)
+            ========================================================= */}
+        {isAdmin && activeTab === 'gestionnaires' && (
+          <div>
+            {/* Toolbar for Gestionnaires */}
+            <section className="toolbar-card">
+              <div className="filter-group">
+                <form onSubmit={handleGestSearchSubmit} className="search-input-wrap">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Search gestionnaire name, email..."
+                    value={gestSearch}
+                    onChange={(e) => setGestSearch(e.target.value)}
+                  />
+                </form>
+              </div>
 
-        {/* Big Vehicle Cards Showcase */}
-        <div className="fleet-cards-grid">
-          {loading ? (
-            <div className="loading-fleet-container">
-              Loading fleet telemetry and vehicles...
-            </div>
-          ) : cars.length === 0 ? (
-            <div className="empty-fleet-container">
-              <div className="empty-fleet-icon">✦</div>
-              <h3>No Vehicles In Fleet</h3>
-              <p>No vehicles match your active search or filters. Click &quot;+ Add New Vehicle&quot; to expand your fleet catalog.</p>
-              <button type="button" className="add-car-btn" onClick={handleOpenAdd} style={{ margin: '0 auto' }}>
-                <span>+ Add First Vehicle</span>
+              <button type="button" className="add-car-btn" onClick={handleOpenAddGest}>
+                <span>+ Add New Gestionnaire</span>
               </button>
-            </div>
-          ) : (
-            cars.map((car) => {
-              const isRented = car.status === 'rented';
-              const formattedRate = parseFloat(car.daily_rate || 0).toFixed(0);
+            </section>
 
-              return (
-                <div key={car.id} className="vehicle-big-card">
-                  {/* Card Top Metadata Bar */}
-                  <div className="card-top-meta">
-                    <div className="card-meta-left">
-                      <span className="plate-chip">{car.license_plate}</span>
-                      <span className="year-chip">MY {car.year}</span>
-                    </div>
-
-                    <span className={`status-pill status-${car.status}`}>
-                      <span className="status-dot"></span>
-                      <span>{car.status === 'rented' ? 'Chartered' : car.status}</span>
-                    </span>
-                  </div>
-
-                  {/* Hero Widescreen Vehicle Image Stage */}
-                  <div className="card-hero-stage">
-                    <img
-                      src={car.image || defaultCarBg}
-                      alt={`${car.brand} ${car.model}`}
-                      className="card-hero-image"
-                      onError={(e) => {
-                        e.target.src = defaultCarBg;
-                      }}
-                    />
-                    <div className="card-price-badge">
-                      <span className="card-price-amount">${formattedRate}</span>
-                      <span className="card-price-period">/ day</span>
-                    </div>
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="card-body">
-                    <div className="card-category-kicker">
-                      {car.category} • {car.brand}
-                    </div>
-
-                    <h2 className="card-vehicle-title">
-                      {car.brand} {car.model}
-                    </h2>
-
-                    {/* 4-Cell Telemetry / Spec Matrix */}
-                    <div className="spec-matrix-grid">
-                      <div className="spec-cell">
-                        <span className="spec-label">Output</span>
-                        <span className="spec-value">{car.horsepower ? `${car.horsepower} HP` : '—'}</span>
+            {/* Gestionnaires Grid */}
+            <div className="gestionnaires-grid">
+              {loadingGestionnaires ? (
+                <div className="loading-fleet-container">
+                  Loading gestionnaires staff directory...
+                </div>
+              ) : gestionnaires.length === 0 ? (
+                <div className="empty-fleet-container">
+                  <div className="empty-fleet-icon">👥</div>
+                  <h3>No Gestionnaires Registered</h3>
+                  <p>Create dedicated gestionnaire staff accounts to delegate vehicle management and fleet CRUD operations.</p>
+                  <button type="button" className="add-car-btn" onClick={handleOpenAddGest} style={{ margin: '0 auto' }}>
+                    <span>+ Add First Gestionnaire</span>
+                  </button>
+                </div>
+              ) : (
+                gestionnaires.map((gest) => (
+                  <div key={gest.id} className="gest-card">
+                    <div>
+                      <div className="gest-header-row">
+                        <div className="gest-avatar">
+                          <span>{gest.name.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div className="gest-info">
+                          <h3>{gest.name}</h3>
+                          <p>{gest.email}</p>
+                        </div>
                       </div>
-                      <div className="spec-cell">
-                        <span className="spec-label">Drive</span>
-                        <span className="spec-value">{car.transmission || 'Auto'}</span>
-                      </div>
-                      <div className="spec-cell">
-                        <span className="spec-label">Cockpit</span>
-                        <span className="spec-value">{car.seating_capacity || 2} Seats</span>
-                      </div>
-                      <div className="spec-cell">
-                        <span className="spec-label">Fuel</span>
-                        <span className="spec-value">{car.fuel_type || 'Petrol'}</span>
+
+                      <div className="gest-meta-box">
+                        <span>Role: <strong>Gestionnaire Flotte</strong></span>
+                        <span>ID #{gest.id}</span>
                       </div>
                     </div>
 
-                    {/* Operational Telemetry Line */}
-                    <div className="telemetry-status-row">
-                      <span className="telemetry-status-text">
-                        <span>●</span>
-                        <span>
-                          {car.status === 'available' && <>Status: <strong>Ready for Dispatch</strong></>}
-                          {car.status === 'rented' && <>Status: <strong>Active Client Charter</strong></>}
-                          {car.status === 'maintenance' && <>Status: <strong>In Atelier Inspection</strong></>}
-                        </span>
-                      </span>
-                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>
-                        ID #{car.id}
-                      </span>
-                    </div>
-
-                    {/* Card Actions */}
-                    <div className="card-actions-row">
+                    <div className="gest-actions-row">
                       <button
                         type="button"
                         className="action-edit-btn"
-                        onClick={() => handleOpenEdit(car)}
+                        onClick={() => handleOpenEditGest(gest)}
                       >
-                        <span>✏️</span>
-                        <span>Edit Specifications</span>
+                        <span>✏️ Edit Staff</span>
                       </button>
-
                       <button
                         type="button"
                         className="action-delete-btn"
-                        disabled={isRented}
-                        title={isRented ? 'Cannot delete rented vehicle' : 'Remove vehicle from fleet'}
-                        onClick={() => setCarToDelete(car)}
+                        onClick={() => setGestToDelete(gest)}
                       >
-                        <span>{isRented ? '🔒' : '🗑️'}</span>
-                        <span>{isRented ? 'Locked' : 'Remove'}</span>
+                        <span>🗑️ Remove</span>
                       </button>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
-        {/* Modal: Add / Edit Car */}
+        {/* =========================================================
+            VIEW 2: FLEET MANAGEMENT (GESTIONNAIRE & SUPER ADMIN)
+            ========================================================= */}
+        {(!isAdmin || activeTab === 'fleet') && (
+          <div>
+            {/* Fleet Metrics Strip */}
+            <section className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Total Fleet</h3>
+                  <span className="stat-indicator-dot dot-total"></span>
+                </div>
+                <div className="stat-number">{String(totalCount).padStart(2, '0')}</div>
+                <div className="stat-subtext">Registered Vehicles</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Available</h3>
+                  <span className="stat-indicator-dot dot-available"></span>
+                </div>
+                <div className="stat-number">{String(availableCount).padStart(2, '0')}</div>
+                <div className="stat-subtext">Immediate Dispatch</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Chartered</h3>
+                  <span className="stat-indicator-dot dot-rented"></span>
+                </div>
+                <div className="stat-number">{String(rentedCount).padStart(2, '0')}</div>
+                <div className="stat-subtext">Active Client Bookings</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>In Service</h3>
+                  <span className="stat-indicator-dot dot-maintenance"></span>
+                </div>
+                <div className="stat-number">{String(maintenanceCount).padStart(2, '0')}</div>
+                <div className="stat-subtext">Atelier / Inspection</div>
+              </div>
+            </section>
+
+            {/* Toolbar & Filter Bar */}
+            <section className="toolbar-card">
+              <div className="filter-group">
+                <form onSubmit={handleSearchSubmit} className="search-input-wrap">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Search brand, model, license plate..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </form>
+
+                <select
+                  className="select-filter"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">All Statuses</option>
+                  <option value="available">● Available</option>
+                  <option value="rented">● Chartered / Rented</option>
+                  <option value="maintenance">● In Service</option>
+                </select>
+
+                <select
+                  className="select-filter"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                >
+                  <option value="">All Categories</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Luxury Sedan">Luxury Sedan</option>
+                  <option value="SUV">SUV</option>
+                </select>
+              </div>
+
+              <button type="button" className="add-car-btn" onClick={handleOpenAdd}>
+                <span>+ Add New Vehicle</span>
+              </button>
+            </section>
+
+            {/* Big Vehicle Cards Showcase */}
+            <div className="fleet-cards-grid">
+              {loading ? (
+                <div className="loading-fleet-container">
+                  Loading fleet telemetry and vehicles...
+                </div>
+              ) : cars.length === 0 ? (
+                <div className="empty-fleet-container">
+                  <div className="empty-fleet-icon">✦</div>
+                  <h3>No Vehicles In Fleet</h3>
+                  <p>No vehicles match your active search or filters. Click &quot;+ Add New Vehicle&quot; to expand your fleet catalog.</p>
+                  <button type="button" className="add-car-btn" onClick={handleOpenAdd} style={{ margin: '0 auto' }}>
+                    <span>+ Add First Vehicle</span>
+                  </button>
+                </div>
+              ) : (
+                cars.map((car) => {
+                  const isRented = car.status === 'rented';
+                  const formattedRate = parseFloat(car.daily_rate || 0).toFixed(0);
+
+                  return (
+                    <div key={car.id} className="vehicle-big-card">
+                      {/* Card Top Metadata Bar */}
+                      <div className="card-top-meta">
+                        <div className="card-meta-left">
+                          <span className="plate-chip">{car.license_plate}</span>
+                          <span className="year-chip">MY {car.year}</span>
+                        </div>
+
+                        <span className={`status-pill status-${car.status}`}>
+                          <span className="status-dot"></span>
+                          <span>{car.status === 'rented' ? 'Chartered' : car.status}</span>
+                        </span>
+                      </div>
+
+                      {/* Hero Widescreen Vehicle Image Stage */}
+                      <div className="card-hero-stage">
+                        <img
+                          src={car.image || defaultCarBg}
+                          alt={`${car.brand} ${car.model}`}
+                          className="card-hero-image"
+                          onError={(e) => {
+                            e.target.src = defaultCarBg;
+                          }}
+                        />
+                        <div className="card-price-badge">
+                          <span className="card-price-amount">${formattedRate}</span>
+                          <span className="card-price-period">/ day</span>
+                        </div>
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="card-body">
+                        <div className="card-category-kicker">
+                          {car.category} • {car.brand}
+                        </div>
+
+                        <h2 className="card-vehicle-title">
+                          {car.brand} {car.model}
+                        </h2>
+
+                        {/* 4-Cell Telemetry / Spec Matrix */}
+                        <div className="spec-matrix-grid">
+                          <div className="spec-cell">
+                            <span className="spec-label">Output</span>
+                            <span className="spec-value">{car.horsepower ? `${car.horsepower} HP` : '—'}</span>
+                          </div>
+                          <div className="spec-cell">
+                            <span className="spec-label">Drive</span>
+                            <span className="spec-value">{car.transmission || 'Auto'}</span>
+                          </div>
+                          <div className="spec-cell">
+                            <span className="spec-label">Cockpit</span>
+                            <span className="spec-value">{car.seating_capacity || 2} Seats</span>
+                          </div>
+                          <div className="spec-cell">
+                            <span className="spec-label">Fuel</span>
+                            <span className="spec-value">{car.fuel_type || 'Petrol'}</span>
+                          </div>
+                        </div>
+
+                        {/* Operational Telemetry Line */}
+                        <div className="telemetry-status-row">
+                          <span className="telemetry-status-text">
+                            <span>●</span>
+                            <span>
+                              {car.status === 'available' && <>Status: <strong>Ready for Dispatch</strong></>}
+                              {car.status === 'rented' && <>Status: <strong>Active Client Charter</strong></>}
+                              {car.status === 'maintenance' && <>Status: <strong>In Atelier Inspection</strong></>}
+                            </span>
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>
+                            ID #{car.id}
+                          </span>
+                        </div>
+
+                        {/* Card Actions */}
+                        <div className="card-actions-row">
+                          <button
+                            type="button"
+                            className="action-edit-btn"
+                            onClick={() => handleOpenEdit(car)}
+                          >
+                            <span>✏️</span>
+                            <span>Edit Specifications</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="action-delete-btn"
+                            disabled={isRented}
+                            title={isRented ? 'Cannot delete rented vehicle' : 'Remove vehicle from fleet'}
+                            onClick={() => setCarToDelete(car)}
+                          >
+                            <span>{isRented ? '🔒' : '🗑️'}</span>
+                            <span>{isRented ? 'Locked' : 'Remove'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================
+            MODAL: ADD / EDIT GESTIONNAIRE (SUPER ADMIN)
+            ========================================================= */}
+        {isGestModalOpen && (
+          <div className="modal-overlay" onClick={() => setIsGestModalOpen(false)}>
+            <div className="modal-card" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>{gestModalMode === 'add' ? 'Create Gestionnaire Account' : `Edit ${gestFormData.name}`}</h2>
+                <button type="button" className="close-modal-btn" onClick={() => setIsGestModalOpen(false)}>
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveGest}>
+                <div className="form-group-item" style={{ marginBottom: '16px' }}>
+                  <label>Full Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="e.g. Marc Dubois"
+                    value={gestFormData.name}
+                    onChange={handleGestFormChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group-item" style={{ marginBottom: '16px' }}>
+                  <label>Email Address *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="e.g. gestionnaire@location-voitures.com"
+                    value={gestFormData.email}
+                    onChange={handleGestFormChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group-item" style={{ marginBottom: '20px' }}>
+                  <label>{gestModalMode === 'add' ? 'Password *' : 'New Password (Leave blank to keep unchanged)'}</label>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder={gestModalMode === 'add' ? 'Minimum 6 characters' : 'Enter new password'}
+                    value={gestFormData.password}
+                    onChange={handleGestFormChange}
+                    required={gestModalMode === 'add'}
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="cancel-btn"
+                    onClick={() => setIsGestModalOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="save-car-btn" disabled={gestSubmitting}>
+                    {gestSubmitting ? 'Saving...' : gestModalMode === 'add' ? 'Create Gestionnaire' : 'Update Credentials'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: DELETE GESTIONNAIRE SAFEGUARD (SUPER ADMIN) */}
+        {gestToDelete && (
+          <div className="modal-overlay" onClick={() => setGestToDelete(null)}>
+            <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                <div style={{ fontSize: '2.2rem', marginBottom: '12px' }}>⚠️</div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+                  Remove Gestionnaire?
+                </h2>
+                <p style={{ fontSize: '0.86rem', color: '#64748b', lineHeight: 1.6 }}>
+                  Are you sure you want to deactivate <strong style={{ color: '#0f172a' }}>{gestToDelete.name}</strong> ({gestToDelete.email})? They will no longer have access to manage the fleet.
+                </p>
+              </div>
+
+              <div className="modal-actions" style={{ justifyContent: 'center' }}>
+                <button type="button" className="cancel-btn" onClick={() => setGestToDelete(null)}>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="action-delete-btn"
+                  style={{
+                    padding: '11px 22px',
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 700,
+                  }}
+                  onClick={confirmDeleteGest}
+                >
+                  Confirm Removal
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================
+            MODAL: ADD / EDIT CAR
+            ========================================================= */}
         {isModalOpen && (
           <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
             <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -1368,7 +1865,6 @@ function AdminDashboard({ user, onLogout }) {
               </div>
 
               <form onSubmit={handleSaveCar}>
-                {/* Brand & Model */}
                 <div className="form-grid-2">
                   <div className="form-group-item">
                     <label>Brand *</label>
@@ -1394,7 +1890,6 @@ function AdminDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                {/* Year, Category, License Plate */}
                 <div className="form-grid-2">
                   <div className="form-group-item">
                     <label>Model Year *</label>
@@ -1419,7 +1914,6 @@ function AdminDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                {/* License Plate & Daily Rate */}
                 <div className="form-grid-2">
                   <div className="form-group-item">
                     <label>License Plate (Unique) *</label>
@@ -1447,7 +1941,6 @@ function AdminDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                {/* Transmission & Fuel Type */}
                 <div className="form-grid-2">
                   <div className="form-group-item">
                     <label>Transmission *</label>
@@ -1467,7 +1960,6 @@ function AdminDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                {/* Seating Capacity & Horsepower */}
                 <div className="form-grid-2">
                   <div className="form-group-item">
                     <label>Seats *</label>
@@ -1502,7 +1994,6 @@ function AdminDashboard({ user, onLogout }) {
                   </select>
                 </div>
 
-                {/* Image Upload Box */}
                 <div className="form-group-item">
                   <label>Vehicle Presentation Image</label>
                   <input
@@ -1545,7 +2036,6 @@ function AdminDashboard({ user, onLogout }) {
                     )}
                   </div>
 
-                  {/* Preset Quick Select */}
                   <div className="preset-buttons-row">
                     <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Presets:</span>
                     <button
@@ -1582,7 +2072,7 @@ function AdminDashboard({ user, onLogout }) {
           </div>
         )}
 
-        {/* Delete Confirmation Safeguard Dialog */}
+        {/* MODAL: DELETE CAR SAFEGUARD */}
         {carToDelete && (
           <div className="modal-overlay" onClick={() => setCarToDelete(null)}>
             <div className="modal-card" style={{ maxWidth: '460px' }} onClick={(e) => e.stopPropagation()}>

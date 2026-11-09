@@ -383,7 +383,7 @@ const registerStyles = `
   }
 `;
 
-function Register({ onRegisterSuccess, onSwitchToLogin }) {
+function Register({ onRegisterSuccess, onSwitchToLogin, onBackToFleet }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -492,6 +492,28 @@ function Register({ onRegisterSuccess, onSwitchToLogin }) {
 
         {/* ================= RIGHT SIDE: FORM ================= */}
         <div className="form-panel">
+          {onBackToFleet && (
+            <button
+              type="button"
+              style={{
+                alignSelf: 'flex-start',
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                fontSize: '0.84rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 0',
+              }}
+              onClick={onBackToFleet}
+            >
+              ← Return to Fleet Showcase
+            </button>
+          )}
           <div className="form-header">
             <div className="driver-access-tag">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">

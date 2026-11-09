@@ -222,6 +222,108 @@ export async function deleteCar(id) {
   return data;
 }
 
+/**
+ * Fetch all gestionnaires (Super Admin only).
+ * 
+ * @param {Object} [params]
+ * @param {string} [params.search]
+ * @returns {Promise<Array>} List of gestionnaires
+ */
+export async function getGestionnaires(params = {}) {
+  const query = new URLSearchParams();
+  if (params.search) query.append('search', params.search);
+
+  const response = await fetch(`${API_BASE_URL}/admin/gestionnaires?${query.toString()}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to fetch gestionnaires.');
+  }
+  return data.data || [];
+}
+
+/**
+ * Create a new gestionnaire staff account (Super Admin only).
+ * 
+ * @param {Object} params
+ * @param {string} params.name
+ * @param {string} params.email
+ * @param {string} params.password
+ * @returns {Promise<Object>} Created gestionnaire
+ */
+export async function createGestionnaire({ name, email, password }) {
+  const response = await fetch(`${API_BASE_URL}/admin/gestionnaires`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    const error = new Error(data.message || 'Failed to create gestionnaire.');
+    error.errors = data.errors || {};
+    throw error;
+  }
+  return data;
+}
+
+/**
+ * Update an existing gestionnaire account.
+ * 
+ * @param {number|string} id
+ * @param {Object} params
+ * @param {string} params.name
+ * @param {string} params.email
+ * @param {string} [params.password]
+ * @returns {Promise<Object>} Updated gestionnaire
+ */
+export async function updateGestionnaire(id, { name, email, password }) {
+  const response = await fetch(`${API_BASE_URL}/admin/gestionnaires/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    const error = new Error(data.message || 'Failed to update gestionnaire.');
+    error.errors = data.errors || {};
+    throw error;
+  }
+  return data;
+}
+
+/**
+ * Delete a gestionnaire account.
+ * 
+ * @param {number|string} id
+ * @returns {Promise<Object>}
+ */
+export async function deleteGestionnaire(id) {
+  const response = await fetch(`${API_BASE_URL}/admin/gestionnaires/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to delete gestionnaire.');
+  }
+  return data;
+}
+
 export default {
   registerUser,
   loginUser,
@@ -233,4 +335,8 @@ export default {
   createCar,
   updateCar,
   deleteCar,
+  getGestionnaires,
+  createGestionnaire,
+  updateGestionnaire,
+  deleteGestionnaire,
 };
