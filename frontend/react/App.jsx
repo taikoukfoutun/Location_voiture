@@ -16,14 +16,16 @@ const appGlobalStyles = `
   body {
     min-height: 100vh;
     background: #f8fafc;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   #root {
     width: 100%;
     min-height: 100vh;
+    background: #f8fafc;
   }
 
   /* Centered Auth Stage for Login / Register */
@@ -33,7 +35,7 @@ const appGlobalStyles = `
     align-items: center;
     justify-content: center;
     padding: 2.5rem 1rem;
-    background: #f1f2f8;
+    background: #f1f5f9;
   }
 
   /* Admin Mode wrapper */
@@ -61,6 +63,18 @@ function App() {
     } else {
       setCurrentView('showcase');
     }
+  };
+
+  const handleUpdateUser = (updatedUser) => {
+    setUser(updatedUser);
+    setStoredUser(updatedUser);
+  };
+
+  const handleReturnToShowcase = () => {
+    // Ensure fresh user data is synchronized from storage
+    const freshUser = getStoredUser();
+    if (freshUser) setUser(freshUser);
+    setCurrentView('showcase');
   };
 
   const handleLogout = async () => {
@@ -127,7 +141,8 @@ function App() {
         <UserDashboard
           user={user}
           onLogout={handleLogout}
-          onBackToFleet={() => setCurrentView('showcase')}
+          onUpdateUser={handleUpdateUser}
+          onBackToFleet={handleReturnToShowcase}
         />
       )}
 

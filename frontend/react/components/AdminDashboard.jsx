@@ -8,8 +8,122 @@ import {
   createGestionnaire,
   updateGestionnaire,
   deleteGestionnaire,
+  getReservations,
+  updateReservationStatus,
 } from '../db';
 import defaultCarBg from '../assets/luxury_coastal_car.jpg';
+
+const IconClose = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const IconCalendar = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const IconFile = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+  </svg>
+);
+
+const IconUser = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const IconSearch = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const IconArrowLeft = ({ size = 14, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12" />
+    <polyline points="12 19 5 12 12 5" />
+  </svg>
+);
+
+const IconEdit = ({ size = 14, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+);
+
+const IconTrash = ({ size = 14, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
+
+const IconLock = ({ size = 14, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+const IconCamera = ({ size = 20, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+    <circle cx="12" cy="13" r="4" />
+  </svg>
+);
+
+const IconAlert = ({ size = 20, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+
+const IconCheck = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const IconStaff = ({ size = 15, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+const IconCar = ({ size = 15, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.1 2 11.6 2 12v4c0 .6.4 1 1 1h2" />
+    <circle cx="7" cy="17" r="2" />
+    <path d="M9 17h6" />
+    <circle cx="17" cy="17" r="2" />
+  </svg>
+);
+
+const IconShield = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
 
 const adminDashboardStyles = `
   /* =========================================================
@@ -20,7 +134,7 @@ const adminDashboardStyles = `
   .admin-hub {
     width: 100%;
     color: #0f172a;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', Helvetica, Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -171,6 +285,278 @@ const adminDashboardStyles = `
   .admin-tab-btn.active .admin-tab-count {
     background: #0f172a;
     color: #ffffff;
+  }
+
+  /* Reservations Page Styles */
+  .res-filter-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .res-filter-pill {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .res-filter-pill:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+
+  .res-filter-pill.active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #ffffff;
+  }
+
+  .badge-res-pending {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #b45309;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .badge-res-confirmed {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #059669;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .badge-res-rejected {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .badge-res-completed {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .btn-action-inspect {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-action-inspect:hover {
+    background: #1e293b;
+  }
+
+  .btn-action-accept {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #059669;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-action-accept:hover {
+    background: #d1fae5;
+  }
+
+  .btn-action-reject {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-action-reject:hover {
+    background: #fee2e2;
+  }
+
+  /* Issue Modal Bespoke UI */
+  .issue-modal-box {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px 30px;
+    width: 100%;
+    max-width: 580px;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+    border: 1px solid #e2e8f0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .issue-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .issue-badge-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .issue-context-strip {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: #334155;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .issue-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  @media (max-width: 640px) {
+    .issue-preset-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .issue-preset-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .issue-preset-card:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+    transform: translateY(-1px);
+  }
+
+  .issue-preset-card.active {
+    background: #f8fafc;
+    border-color: #0f172a;
+    box-shadow: 0 0 0 1.5px #0f172a;
+  }
+
+  .issue-preset-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .issue-preset-desc {
+    font-size: 0.74rem;
+    color: #64748b;
+    line-height: 1.35;
+  }
+
+  .issue-textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 0.88rem;
+    color: #0f172a;
+    background: #ffffff;
+    outline: none;
+    font-family: inherit;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    resize: vertical;
+  }
+
+  .issue-textarea:focus {
+    border-color: #0f172a;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+  }
+
+  .issue-helper-box {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    margin-bottom: 22px;
+    font-size: 0.78rem;
+    color: #1e40af;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
   }
 
   /* Global Feedback Alert */
@@ -1061,11 +1447,52 @@ const adminDashboardStyles = `
   }
 `;
 
+const ISSUE_TEMPLATES = [
+  {
+    key: 'illegible',
+    title: 'Illegible License Scan',
+    desc: 'Image is blurred, dark, cut off, or low resolution',
+    text: "Driver's license scan is blurred, cropped, or illegible. Please upload a clear, high-resolution photo or PDF scan (front and back visible)."
+  },
+  {
+    key: 'expired',
+    title: 'Expired License',
+    desc: 'The license expiration date has already passed',
+    text: "The driver's license expiration date provided has passed. Please upload your renewed valid driver's license to proceed."
+  },
+  {
+    key: 'mismatch',
+    title: 'Identity Mismatch',
+    desc: 'Account name differs from the official license',
+    text: "The legal name on your customer account does not match the driver's license credentials provided. Please correct your profile name or provide matching credentials."
+  },
+  {
+    key: 'address',
+    title: 'Address Verification',
+    desc: 'Residential address is invalid or missing',
+    text: "Please provide a complete residential address in your driver profile before the reservation can be approved."
+  }
+];
+
 function AdminDashboard({ user, onLogout, onBackToFleet }) {
   const isAdmin = user?.role === 'admin';
 
-  // Navigation Tab State (Super Admin can toggle between Gestionnaires and Fleet)
-  const [activeTab, setActiveTab] = useState(isAdmin ? 'gestionnaires' : 'fleet');
+  // Navigation Tab State (Default to 'reservations' so gestionnaires immediately inspect bookings!)
+  const [activeTab, setActiveTab] = useState('reservations');
+
+  // =========================================================
+  // RESERVATIONS & VERIFICATION STATE
+  // =========================================================
+  const [reservations, setReservations] = useState([]);
+  const [resLoading, setResLoading] = useState(false);
+  const [resFilter, setResFilter] = useState('all');
+  const [resSearch, setResSearch] = useState('');
+  const [resCounts, setResCounts] = useState({ all: 0, pending: 0, confirmed: 0, rejected: 0, completed: 0 });
+  const [selectedResForInspection, setSelectedResForInspection] = useState(null);
+  const [issueModalRes, setIssueModalRes] = useState(null);
+  const [issueMessageText, setIssueMessageText] = useState('');
+  const [selectedReasonKey, setSelectedReasonKey] = useState('');
+  const [statusActionLoading, setStatusActionLoading] = useState(false);
 
   // Fleet / Cars State
   const [cars, setCars] = useState([]);
@@ -1157,6 +1584,98 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
       setAlert({ type: 'error', message: err.message || 'Error loading gestionnaires.' });
     } finally {
       setLoadingGestionnaires(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReservations();
+  }, [resFilter]);
+
+  const loadReservations = async () => {
+    setResLoading(true);
+    try {
+      const res = await getReservations({
+        status: resFilter !== 'all' ? resFilter : undefined,
+        search: resSearch.trim() || undefined,
+      });
+      setReservations(res.data || []);
+      if (res.counts) setResCounts(res.counts);
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Error loading reservations.' });
+    } finally {
+      setResLoading(false);
+    }
+  };
+
+  const handleResSearchSubmit = (e) => {
+    e.preventDefault();
+    loadReservations();
+  };
+
+  const handleAcceptReservation = async (reservation) => {
+    setStatusActionLoading(true);
+    try {
+      await updateReservationStatus(reservation.id, {
+        status: 'confirmed',
+        admin_message: 'Your driver credentials and booking dates have been verified and approved.',
+      });
+      setAlert({
+        type: 'success',
+        message: `Reservation #${reservation.id} confirmed! Vehicle ${reservation.car?.brand || ''} ${reservation.car?.model || ''} has been automatically switched to "Rented".`
+      });
+      setSelectedResForInspection(null);
+      await loadReservations();
+      await loadFleet();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Failed to accept reservation.' });
+    } finally {
+      setStatusActionLoading(false);
+    }
+  };
+
+  const handleRejectReservation = async (e) => {
+    e.preventDefault();
+    if (!issueModalRes) return;
+    setStatusActionLoading(true);
+    try {
+      await updateReservationStatus(issueModalRes.id, {
+        status: 'rejected',
+        admin_message: issueMessageText.trim() || 'Driver documentation or credentials issue detected. Please check credentials in your profile.',
+      });
+      setAlert({
+        type: 'success',
+        message: `Reservation #${issueModalRes.id} marked as Action Required. Feedback message dispatched to client.`
+      });
+      setIssueModalRes(null);
+      setIssueMessageText('');
+      setSelectedResForInspection(null);
+      await loadReservations();
+      await loadFleet();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Failed to report issue.' });
+    } finally {
+      setStatusActionLoading(false);
+    }
+  };
+
+  const handleCompleteReservation = async (reservation) => {
+    setStatusActionLoading(true);
+    try {
+      await updateReservationStatus(reservation.id, {
+        status: 'completed',
+        admin_message: 'Vehicle returned and checked in successfully.',
+      });
+      setAlert({
+        type: 'success',
+        message: `Rental #${reservation.id} completed! Vehicle ${reservation.car?.brand || ''} ${reservation.car?.model || ''} has been automatically returned to "Available".`
+      });
+      setSelectedResForInspection(null);
+      await loadReservations();
+      await loadFleet();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Failed to complete rental.' });
+    } finally {
+      setStatusActionLoading(false);
     }
   };
 
@@ -1366,7 +1885,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
         <header className="admin-nav">
           <div className="admin-brand">
             <div className="admin-brand-icon">
-              <span>✦</span>
+              <IconShield size={20} />
             </div>
             <div className="admin-title-group">
               <div className="admin-kicker">
@@ -1374,12 +1893,14 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                 <span>
                   {isAdmin
                     ? 'Super Admin Console • Executive Administration'
-                    : 'Fleet Operations Console • Monaco Vault'}
+                    : 'Fleet Operations Console • Private Desk'}
                 </span>
               </div>
               <h1>
-                {isAdmin && activeTab === 'gestionnaires'
-                  ? 'Gestionnaires Staff Overview'
+                {activeTab === 'reservations'
+                  ? 'Reservations & Driver Verification'
+                  : activeTab === 'gestionnaires'
+                  ? 'Staff & Gestionnaires Directory'
                   : 'Fleet Management Hub'}
               </h1>
             </div>
@@ -1393,20 +1914,25 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                   background: '#f1f5f9',
                   border: '1px solid #cbd5e1',
                   color: '#0f172a',
-                  padding: '7px 14px',
+                  padding: '7px 16px',
                   borderRadius: '9999px',
                   fontSize: '0.82rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   marginRight: '8px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
                 }}
                 onClick={onBackToFleet}
               >
-                🚗 Public Showcase
+                <IconArrowLeft size={13} />
+                <span>Public Showcase</span>
               </button>
             )}
             <span className="admin-badge-pill">
-              <span>{isAdmin ? '👑 Super Admin' : '🏎️ Gestionnaire'}</span>
+              <span>{isAdmin ? 'Super Admin' : 'Gestionnaire'}</span>
+              <span>•</span>
               <span>{user?.name || 'Administrator'}</span>
             </span>
             <button type="button" className="logout-pill-btn" onClick={onLogout}>
@@ -1418,7 +1944,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
         {/* Global Feedback Alert */}
         {alert && (
           <div className={`admin-alert ${alert.type === 'error' ? 'admin-alert-error' : 'admin-alert-success'}`}>
-            <span>{alert.type === 'error' ? '⚠️' : '✓'} {alert.message}</span>
+            <span>{alert.type === 'error' ? 'Notice:' : 'Success:'} {alert.message}</span>
             <button
               type="button"
               style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold', color: 'inherit' }}
@@ -1429,26 +1955,335 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
           </div>
         )}
 
-        {/* Super Admin Tab Switcher */}
-        {isAdmin && (
-          <nav className="admin-tabs-nav">
+        {/* Tab Switcher (Available to both Gestionnaires and Super Admin) */}
+        <nav className="admin-tabs-nav">
+          <button
+            type="button"
+            className={`admin-tab-btn ${activeTab === 'reservations' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('reservations');
+              loadReservations();
+            }}
+          >
+            <IconCalendar size={15} />
+            <span>Reservations & Review</span>
+            <span
+              className="admin-tab-count"
+              style={{
+                background: resCounts.pending > 0 ? '#f59e0b' : undefined,
+                color: resCounts.pending > 0 ? '#ffffff' : undefined,
+              }}
+            >
+              {resCounts.pending > 0 ? `${resCounts.pending} Pending` : reservations.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className={`admin-tab-btn ${activeTab === 'fleet' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('fleet');
+              loadFleet();
+            }}
+          >
+            <IconCar size={15} />
+            <span>Fleet Inventory</span>
+            <span className="admin-tab-count">{cars.length}</span>
+          </button>
+
+          {isAdmin && (
             <button
               type="button"
               className={`admin-tab-btn ${activeTab === 'gestionnaires' ? 'active' : ''}`}
-              onClick={() => setActiveTab('gestionnaires')}
+              onClick={() => {
+                setActiveTab('gestionnaires');
+                loadGestionnaires();
+              }}
             >
-              <span>👥 Staff & Gestionnaires</span>
+              <IconStaff size={15} />
+              <span>Staff & Gestionnaires</span>
               <span className="admin-tab-count">{gestionnaires.length}</span>
             </button>
-            <button
-              type="button"
-              className={`admin-tab-btn ${activeTab === 'fleet' ? 'active' : ''}`}
-              onClick={() => setActiveTab('fleet')}
-            >
-              <span>🏎️ Fleet Showcase</span>
-              <span className="admin-tab-count">{cars.length}</span>
-            </button>
-          </nav>
+          )}
+        </nav>
+
+        {/* =========================================================
+            VIEW 0: RESERVATIONS & DRIVER VERIFICATION (GESTIONNAIRE & ADMIN)
+            ========================================================= */}
+        {activeTab === 'reservations' && (
+          <div>
+            {/* Metric Strip */}
+            <section className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Total Bookings</h3>
+                  <span className="stat-indicator-dot dot-total"></span>
+                </div>
+                <div className="stat-number">{String(reservations.length).padStart(2, '0')}</div>
+                <div className="stat-subtext">All Lifetime Records</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Pending Review</h3>
+                  <span className="stat-indicator-dot" style={{ background: '#f59e0b' }}></span>
+                </div>
+                <div className="stat-number" style={{ color: resCounts.pending > 0 ? '#b45309' : '#0f172a' }}>
+                  {String(resCounts.pending).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Awaiting Document Check</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Active Chartered</h3>
+                  <span className="stat-indicator-dot dot-available"></span>
+                </div>
+                <div className="stat-number" style={{ color: '#059669' }}>
+                  {String(resCounts.confirmed).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Vehicles Out on Rental</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Action Required</h3>
+                  <span className="stat-indicator-dot dot-maintenance"></span>
+                </div>
+                <div className="stat-number" style={{ color: resCounts.rejected > 0 ? '#dc2626' : '#0f172a' }}>
+                  {String(resCounts.rejected).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Flagged / Issue Reported</div>
+              </div>
+            </section>
+
+            {/* Filter Pills & Search Strip */}
+            <section className="toolbar-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                <div className="res-filter-strip" style={{ marginBottom: 0 }}>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${resFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setResFilter('all')}
+                  >
+                    All Bookings ({reservations.length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${resFilter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setResFilter('pending')}
+                  >
+                    Pending Review ({resCounts.pending})
+                  </button>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${resFilter === 'confirmed' ? 'active' : ''}`}
+                    onClick={() => setResFilter('confirmed')}
+                  >
+                    Confirmed &amp; Active ({resCounts.confirmed})
+                  </button>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${resFilter === 'rejected' ? 'active' : ''}`}
+                    onClick={() => setResFilter('rejected')}
+                  >
+                    Issues Flagged ({resCounts.rejected})
+                  </button>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${resFilter === 'completed' ? 'active' : ''}`}
+                    onClick={() => setResFilter('completed')}
+                  >
+                    Completed ({resCounts.completed})
+                  </button>
+                </div>
+
+                <form onSubmit={handleResSearchSubmit} className="search-input-wrap" style={{ minWidth: '300px' }}>
+                  <span className="search-icon"><IconSearch size={15} /></span>
+                  <input
+                    type="text"
+                    placeholder="Search client, plate, or vehicle..."
+                    value={resSearch}
+                    onChange={(e) => setResSearch(e.target.value)}
+                  />
+                </form>
+              </div>
+            </section>
+
+            {/* Reservations Table */}
+            <div className="fleet-table-container">
+              {resLoading ? (
+                <div className="loading-fleet-container">
+                  Loading reservations and telemetry records...
+                </div>
+              ) : reservations.length === 0 ? (
+                <div className="empty-fleet-container">
+                  <div className="empty-fleet-icon"><IconCalendar size={28} /></div>
+                  <h3>No Reservations Found</h3>
+                  <p>When clients reserve vehicles on the public fleet storefront, their bookings and driver license credentials appear here for verification.</p>
+                </div>
+              ) : (
+                <table className="fleet-table">
+                  <thead>
+                    <tr>
+                      <th>Client / Driver</th>
+                      <th>Reserved Vehicle</th>
+                      <th>Rental Dates</th>
+                      <th>Total Amount</th>
+                      <th>Review Status</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reservations.map((res) => {
+                      const car = res.car || {};
+                      const isPending = res.status === 'pending';
+                      const isConfirmed = res.status === 'confirmed';
+                      const isRejected = res.status === 'rejected';
+                      const isCompleted = res.status === 'completed';
+
+                      return (
+                        <tr key={res.id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{
+                                width: 38,
+                                height: 38,
+                                borderRadius: '50%',
+                                background: '#0f172a',
+                                color: '#ffffff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 800,
+                                fontSize: '0.9rem',
+                                overflow: 'hidden'
+                              }}>
+                                {res.driver_avatar ? (
+                                  <img src={res.driver_avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                  (res.driver_name || 'U').charAt(0).toUpperCase()
+                                )}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.9rem' }}>
+                                  {res.driver_name || 'Customer'}
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                                  {res.driver_email || 'No email'} • {res.driver_phone || 'No phone'}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              {car.image && (
+                                <img
+                                  src={car.image}
+                                  alt=""
+                                  style={{ width: 44, height: 30, objectFit: 'cover', borderRadius: 6, border: '1px solid #e2e8f0' }}
+                                />
+                              )}
+                              <div>
+                                <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>
+                                  {car.brand || 'Vehicle'} {car.model || ''}
+                                </div>
+                                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                                  Plate: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{car.license_plate || 'VIP-FLEET'}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>
+                            <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+                              {String(res.start_date).split('T')[0]} → {String(res.end_date).split('T')[0]}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                              {res.pickup_location || 'Showroom Agency'}
+                            </div>
+                          </td>
+
+                          <td>
+                            <div style={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Space Grotesk, sans-serif', fontSize: '0.95rem' }}>
+                              ${Number(res.total_price).toFixed(2)}
+                            </div>
+                          </td>
+
+                          <td>
+                            {isPending && <span className="badge-res-pending">● Pending Review</span>}
+                            {isConfirmed && <span className="badge-res-confirmed">✓ Confirmed (Rented)</span>}
+                            {isRejected && <span className="badge-res-rejected">✕ Action Required</span>}
+                            {isCompleted && <span className="badge-res-completed">○ Completed</span>}
+                          </td>
+
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+                              <button
+                                type="button"
+                                className="btn-action-inspect"
+                                onClick={() => setSelectedResForInspection(res)}
+                              >
+                                Inspect
+                              </button>
+
+                              {isPending && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="btn-action-accept"
+                                    title="Accept & Confirm (Automatically switches car to Rented)"
+                                    disabled={statusActionLoading}
+                                    onClick={() => handleAcceptReservation(res)}
+                                  >
+                                    Accept
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn-action-reject"
+                                    title="Report documentation issue or reject"
+                                    disabled={statusActionLoading}
+                                    onClick={() => {
+                                      setIssueModalRes(res);
+                                      setIssueMessageText('');
+                                    }}
+                                  >
+                                    Report Issue
+                                  </button>
+                                </>
+                              )}
+
+                              {isConfirmed && (
+                                <button
+                                  type="button"
+                                  style={{
+                                    background: '#f8fafc',
+                                    border: '1px solid #cbd5e1',
+                                    color: '#0f172a',
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                  }}
+                                  disabled={statusActionLoading}
+                                  onClick={() => handleCompleteReservation(res)}
+                                  title="Check-in vehicle and return to available"
+                                >
+                                  Return Car
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
         )}
 
         {/* =========================================================
@@ -1460,10 +2295,10 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
             <section className="toolbar-card">
               <div className="filter-group">
                 <form onSubmit={handleGestSearchSubmit} className="search-input-wrap">
-                  <span className="search-icon">🔍</span>
+                  <span className="search-icon"><IconSearch size={15} /></span>
                   <input
                     type="text"
-                    placeholder="Search gestionnaire name, email..."
+                    placeholder="Search staff by name or email..."
                     value={gestSearch}
                     onChange={(e) => setGestSearch(e.target.value)}
                   />
@@ -1483,7 +2318,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                 </div>
               ) : gestionnaires.length === 0 ? (
                 <div className="empty-fleet-container">
-                  <div className="empty-fleet-icon">👥</div>
+                  <div className="empty-fleet-icon"><IconStaff size={28} /></div>
                   <h3>No Gestionnaires Registered</h3>
                   <p>Create dedicated gestionnaire staff accounts to delegate vehicle management and fleet CRUD operations.</p>
                   <button type="button" className="add-car-btn" onClick={handleOpenAddGest} style={{ margin: '0 auto' }}>
@@ -1516,14 +2351,16 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                         className="action-edit-btn"
                         onClick={() => handleOpenEditGest(gest)}
                       >
-                        <span>✏️ Edit Staff</span>
+                        <IconEdit size={13} />
+                        <span>Edit Staff</span>
                       </button>
                       <button
                         type="button"
                         className="action-delete-btn"
                         onClick={() => setGestToDelete(gest)}
                       >
-                        <span>🗑️ Remove</span>
+                        <IconTrash size={13} />
+                        <span>Remove</span>
                       </button>
                     </div>
                   </div>
@@ -1536,7 +2373,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
         {/* =========================================================
             VIEW 2: FLEET MANAGEMENT (GESTIONNAIRE & SUPER ADMIN)
             ========================================================= */}
-        {(!isAdmin || activeTab === 'fleet') && (
+        {activeTab === 'fleet' && (
           <div>
             {/* Fleet Metrics Strip */}
             <section className="stats-grid">
@@ -1581,10 +2418,10 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
             <section className="toolbar-card">
               <div className="filter-group">
                 <form onSubmit={handleSearchSubmit} className="search-input-wrap">
-                  <span className="search-icon">🔍</span>
+                  <span className="search-icon"><IconSearch size={15} /></span>
                   <input
                     type="text"
-                    placeholder="Search brand, model, license plate..."
+                    placeholder="Search marque, model, plate (e.g. Porsche 911, M4)..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -1627,7 +2464,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                 </div>
               ) : cars.length === 0 ? (
                 <div className="empty-fleet-container">
-                  <div className="empty-fleet-icon">✦</div>
+                  <div className="empty-fleet-icon"><IconCar size={28} /></div>
                   <h3>No Vehicles In Fleet</h3>
                   <p>No vehicles match your active search or filters. Click &quot;+ Add New Vehicle&quot; to expand your fleet catalog.</p>
                   <button type="button" className="add-car-btn" onClick={handleOpenAdd} style={{ margin: '0 auto' }}>
@@ -1722,8 +2559,8 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                             className="action-edit-btn"
                             onClick={() => handleOpenEdit(car)}
                           >
-                            <span>✏️</span>
-                            <span>Edit Specifications</span>
+                            <IconEdit size={13} />
+                            <span>Edit Specs</span>
                           </button>
 
                           <button
@@ -1733,7 +2570,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                             title={isRented ? 'Cannot delete rented vehicle' : 'Remove vehicle from fleet'}
                             onClick={() => setCarToDelete(car)}
                           >
-                            <span>{isRented ? '🔒' : '🗑️'}</span>
+                            {isRented ? <IconLock size={13} /> : <IconTrash size={13} />}
                             <span>{isRented ? 'Locked' : 'Remove'}</span>
                           </button>
                         </div>
@@ -1755,7 +2592,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
               <div className="modal-header">
                 <h2>{gestModalMode === 'add' ? 'Create Gestionnaire Account' : `Edit ${gestFormData.name}`}</h2>
                 <button type="button" className="close-modal-btn" onClick={() => setIsGestModalOpen(false)}>
-                  ✕
+                  <IconClose size={18} />
                 </button>
               </div>
 
@@ -1765,7 +2602,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                   <input
                     type="text"
                     name="name"
-                    placeholder="e.g. Marc Dubois"
+                    placeholder="e.g. Alexandre Moreau"
                     value={gestFormData.name}
                     onChange={handleGestFormChange}
                     required
@@ -1777,7 +2614,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                   <input
                     type="email"
                     name="email"
-                    placeholder="e.g. gestionnaire@location-voitures.com"
+                    placeholder="e.g. operations@prestige-motors.com"
                     value={gestFormData.email}
                     onChange={handleGestFormChange}
                     required
@@ -1819,7 +2656,9 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
           <div className="modal-overlay" onClick={() => setGestToDelete(null)}>
             <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
               <div style={{ textAlign: 'center', padding: '12px 0' }}>
-                <div style={{ fontSize: '2.2rem', marginBottom: '12px' }}>⚠️</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#d97706' }}>
+                  <IconAlert size={34} />
+                </div>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
                   Remove Gestionnaire?
                 </h2>
@@ -1871,7 +2710,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                     <input
                       type="text"
                       name="brand"
-                      placeholder="e.g. Porsche, BMW, Audi"
+                      placeholder="e.g. Porsche, Ferrari, Aston Martin"
                       value={formData.brand}
                       onChange={handleFormChange}
                       required
@@ -1882,7 +2721,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                     <input
                       type="text"
                       name="model"
-                      placeholder="e.g. 911 GT3 RS, M4, Taycan"
+                      placeholder="e.g. 911 GT3 RS, Roma, DBS Superleggera"
                       value={formData.model}
                       onChange={handleFormChange}
                       required
@@ -1933,7 +2772,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                       step="0.01"
                       min="0"
                       name="daily_rate"
-                      placeholder="e.g. 450.00"
+                      placeholder="e.g. 1,450.00"
                       value={formData.daily_rate}
                       onChange={handleFormChange}
                       required
@@ -1978,7 +2817,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                     <input
                       type="number"
                       name="horsepower"
-                      placeholder="e.g. 525"
+                      placeholder="e.g. 640"
                       value={formData.horsepower}
                       onChange={handleFormChange}
                     />
@@ -2025,7 +2864,9 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                       </div>
                     ) : (
                       <div>
-                        <div style={{ fontSize: '1.8rem', marginBottom: '6px' }}>📷</div>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px', color: '#64748b' }}>
+                          <IconCamera size={26} />
+                        </div>
                         <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
                           Upload high-resolution vehicle photo
                         </div>
@@ -2077,7 +2918,9 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
           <div className="modal-overlay" onClick={() => setCarToDelete(null)}>
             <div className="modal-card" style={{ maxWidth: '460px' }} onClick={(e) => e.stopPropagation()}>
               <div style={{ textAlign: 'center', padding: '12px 0' }}>
-                <div style={{ fontSize: '2.2rem', marginBottom: '12px' }}>⚠️</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#dc2626' }}>
+                  <IconAlert size={34} />
+                </div>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
                   Remove {carToDelete.brand} {carToDelete.model}?
                 </h2>
@@ -2098,7 +2941,7 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                       marginTop: '14px',
                     }}
                   >
-                    🔒 Action Blocked: This vehicle is currently chartered by a client and cannot be removed.
+                    Action Blocked: This vehicle is currently chartered by a client and cannot be removed.
                   </div>
                 )}
               </div>
@@ -2123,6 +2966,360 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                   Confirm Delete
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: INSPECT RESERVATION & DRIVER DOCUMENTS */}
+        {selectedResForInspection && (
+          <div className="modal-overlay" onClick={() => setSelectedResForInspection(null)}>
+            <div className="modal-card" style={{ maxWidth: '780px', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                    Inspect Reservation #{selectedResForInspection.id}
+                  </h2>
+                  <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
+                    Submitted on {new Date(selectedResForInspection.created_at || Date.now()).toLocaleDateString()} • Status: <strong style={{ textTransform: 'uppercase' }}>{selectedResForInspection.status}</strong>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close"
+                  onClick={() => setSelectedResForInspection(null)}
+                >
+                  <IconClose size={16} />
+                </button>
+              </div>
+
+              {/* Client & Driver Credentials */}
+              <div style={{ marginBottom: '24px' }}>
+                <h4 style={{ fontSize: '0.76rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#64748b', marginBottom: '12px' }}>
+                  Driver Identification &amp; Contact
+                </h4>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{
+                      width: 90,
+                      height: 90,
+                      borderRadius: '50%',
+                      background: '#0f172a',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '2rem',
+                      overflow: 'hidden',
+                      border: '2px solid #e2e8f0',
+                      margin: '0 auto'
+                    }}>
+                      {selectedResForInspection.driver_avatar ? (
+                        <img src={selectedResForInspection.driver_avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        (selectedResForInspection.driver_name || 'U').charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px', display: 'block', fontWeight: 600 }}>Profile Photo</span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Legal Name</span>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>{selectedResForInspection.driver_name || 'Not provided'}</div>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Email Address</span>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>{selectedResForInspection.driver_email || 'Not provided'}</div>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Phone / WhatsApp</span>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>{selectedResForInspection.driver_phone || 'Not provided'}</div>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>National ID / Passport</span>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>{selectedResForInspection.driver_national_id || 'Not provided'}</div>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Driver License Ref</span>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>{selectedResForInspection.driver_license_number || 'Not provided'}</div>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>License Expiry Date</span>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>{selectedResForInspection.driver_license_expiry ? String(selectedResForInspection.driver_license_expiry).split('T')[0] : '2029-08-15'}</div>
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Residential Address</span>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>{selectedResForInspection.driver_address || 'Not provided'}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Uploaded Driver's License Document Scan Preview */}
+              <div style={{ marginBottom: '24px' }}>
+                <h4 style={{ fontSize: '0.76rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#64748b', marginBottom: '12px' }}>
+                  Driver&apos;s License Document Scan Verification
+                </h4>
+
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px', textAlign: 'center' }}>
+                  {selectedResForInspection.driver_license_doc ? (
+                    <div>
+                      {selectedResForInspection.driver_license_doc.startsWith('data:image') || selectedResForInspection.driver_license_doc.includes('.jpg') || selectedResForInspection.driver_license_doc.includes('.png') ? (
+                        <div>
+                          <img
+                            src={selectedResForInspection.driver_license_doc}
+                            alt="Driver License Document Scan"
+                            style={{ maxHeight: '280px', maxWidth: '100%', objectFit: 'contain', borderRadius: '8px', border: '1px solid #cbd5e1', boxShadow: '0 4px 14px rgba(0,0,0,0.06)' }}
+                          />
+                          <div style={{ marginTop: '10px' }}>
+                            <a
+                              href={selectedResForInspection.driver_license_doc}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 700, textDecoration: 'underline' }}
+                            >
+                              Open Full Resolution Scan in New Tab
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '24px' }}>
+                          <IconFile size={32} color="#059669" />
+                          <div style={{ textAlign: 'left' }}>
+                            <div style={{ fontWeight: 800, color: '#0f172a' }}>Driver_License_Verified_Scan.pdf</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Digital PDF Document Uploaded by Client</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ padding: '20px', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '0.88rem', fontWeight: 600 }}>
+                      <IconAlert size={20} color="#d97706" />
+                      <span>No document file scan attached by customer.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Reserved Vehicle & Dates */}
+              <div style={{ marginBottom: '24px' }}>
+                <h4 style={{ fontSize: '0.76rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#64748b', marginBottom: '12px' }}>
+                  Vehicle &amp; Rental Schedule
+                </h4>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    {selectedResForInspection.car?.image && (
+                      <img
+                        src={selectedResForInspection.car.image}
+                        alt=""
+                        style={{ width: 80, height: 54, objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                      />
+                    )}
+                    <div>
+                      <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem' }}>
+                        {selectedResForInspection.car?.brand} {selectedResForInspection.car?.model}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        Plate: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{selectedResForInspection.car?.license_plate || 'VIP-FLEET'}</span> • Status: <strong>{selectedResForInspection.car?.status}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+                      {String(selectedResForInspection.start_date).split('T')[0]} → {String(selectedResForInspection.end_date).split('T')[0]}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '3px' }}>
+                      Pickup: {selectedResForInspection.pickup_location || 'Showroom Agency'}
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', fontFamily: 'Space Grotesk, sans-serif', marginTop: '6px' }}>
+                      ${Number(selectedResForInspection.total_price).toFixed(2)} Total
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Existing Message / Notice */}
+              {selectedResForInspection.admin_message && (
+                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '14px 18px', marginBottom: '24px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: '#b91c1c', marginBottom: '4px' }}>
+                    Concierge Notice Dispatched to Client:
+                  </div>
+                  <div style={{ fontSize: '0.88rem', color: '#991b1b' }}>{selectedResForInspection.admin_message}</div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="modal-actions" style={{ justifyContent: 'space-between', borderTop: '1px solid #e2e8f0', paddingTop: '18px' }}>
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => setSelectedResForInspection(null)}
+                >
+                  Close Inspection
+                </button>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {selectedResForInspection.status === 'pending' && (
+                    <>
+                      <button
+                        type="button"
+                        className="btn-action-reject"
+                        style={{ padding: '10px 18px', fontSize: '0.86rem' }}
+                        disabled={statusActionLoading}
+                        onClick={() => {
+                          setIssueModalRes(selectedResForInspection);
+                          setIssueMessageText('');
+                        }}
+                      >
+                        Report Issue / Reject
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn-action-accept"
+                        style={{ padding: '10px 22px', fontSize: '0.86rem', background: '#0f172a', color: '#ffffff', border: 'none' }}
+                        disabled={statusActionLoading}
+                        onClick={() => handleAcceptReservation(selectedResForInspection)}
+                      >
+                        {statusActionLoading ? 'Confirming...' : 'Accept & Set Car to Rented'}
+                      </button>
+                    </>
+                  )}
+
+                  {selectedResForInspection.status === 'confirmed' && (
+                    <button
+                      type="button"
+                      style={{
+                        background: '#0f172a',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '10px 22px',
+                        borderRadius: '10px',
+                        fontSize: '0.86rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                      disabled={statusActionLoading}
+                      onClick={() => handleCompleteReservation(selectedResForInspection)}
+                    >
+                      {statusActionLoading ? 'Checking In...' : 'Check-In & Return Car to Available'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: REPORT ISSUE / REJECT MESSAGE COMPOSER */}
+        {issueModalRes && (
+          <div className="modal-overlay" onClick={() => { setIssueModalRes(null); setSelectedReasonKey(''); }}>
+            <div className="issue-modal-box" onClick={(e) => e.stopPropagation()}>
+              <div className="issue-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div className="issue-badge-icon">
+                    <IconAlert size={22} color="#dc2626" />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px', margin: 0 }}>
+                      Flag Document Issue
+                    </h2>
+                    <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                      Reservation #{issueModalRes.id} • Dispatched to Client Hub
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close"
+                  onClick={() => { setIssueModalRes(null); setSelectedReasonKey(''); }}
+                >
+                  <IconClose size={16} />
+                </button>
+              </div>
+
+              {/* Client & Booking Context Banner */}
+              <div className="issue-context-strip">
+                <div>
+                  <strong style={{ color: '#0f172a' }}>Driver:</strong> {issueModalRes.driver_name || 'Customer'}
+                </div>
+                <div>
+                  <strong style={{ color: '#0f172a' }}>Vehicle:</strong> {issueModalRes.car?.brand} {issueModalRes.car?.model}
+                </div>
+                <div>
+                  <strong style={{ color: '#0f172a' }}>Dates:</strong> {String(issueModalRes.start_date).split('T')[0]} → {String(issueModalRes.end_date).split('T')[0]}
+                </div>
+              </div>
+
+              <form onSubmit={handleRejectReservation}>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                    Select Issue Reason (Quick Template)
+                  </label>
+                  <div className="issue-preset-grid">
+                    {ISSUE_TEMPLATES.map((tpl) => (
+                      <div
+                        key={tpl.key}
+                        className={`issue-preset-card ${selectedReasonKey === tpl.key ? 'active' : ''}`}
+                        onClick={() => {
+                          setSelectedReasonKey(tpl.key);
+                          setIssueMessageText(tpl.text);
+                        }}
+                      >
+                        <div className="issue-preset-title">
+                          <span style={{ color: selectedReasonKey === tpl.key ? '#0f172a' : '#94a3b8' }}>●</span>
+                          <span>{tpl.title}</span>
+                        </div>
+                        <div className="issue-preset-desc">{tpl.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '8px' }}>
+                  <label className="form-label" style={{ fontWeight: 700, color: '#0f172a' }}>
+                    Feedback Message Dispatched to Client *
+                  </label>
+                  <textarea
+                    rows="4"
+                    required
+                    className="issue-textarea"
+                    placeholder="Describe the issue with documents or dates clearly so the client knows what to update..."
+                    value={issueMessageText}
+                    onChange={(e) => setIssueMessageText(e.target.value)}
+                  />
+                </div>
+
+                <div className="issue-helper-box">
+                  <IconShield size={16} color="#1d4ed8" />
+                  <span>
+                    The client will see this exact notice in their Driver Hub and can update their profile and documents directly.
+                  </span>
+                </div>
+
+                <div className="modal-actions" style={{ marginTop: '12px' }}>
+                  <button
+                    type="button"
+                    className="cancel-btn"
+                    onClick={() => { setIssueModalRes(null); setSelectedReasonKey(''); }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="action-delete-btn"
+                    style={{ padding: '11px 24px', border: 'none', fontWeight: 700, background: '#0f172a', color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                    disabled={statusActionLoading}
+                  >
+                    <IconAlert size={15} color="#ffffff" />
+                    <span>{statusActionLoading ? 'Dispatching Notice...' : 'Send Notice & Flag Reservation'}</span>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

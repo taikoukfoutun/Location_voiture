@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { loginUser } from '../db';
 import luxuryCarBg from '../assets/luxury_coastal_car.jpg';
 
+const IconStar = ({ size = 13, color = '#0f172a' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
 const loginStyles = `
   .auth-card-split {
     display: grid;
@@ -136,7 +142,7 @@ const loginStyles = `
     border: 1px solid rgba(255, 255, 255, 0.9);
     border-radius: 14px;
     padding: 12px 14px;
-    box-shadow: 0 10px 25px -5px rgba(0, 82, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
     margin-bottom: 12px;
   }
 
@@ -144,20 +150,20 @@ const loginStyles = `
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    background: #0052FF;
+    background: #0f172a;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ffffff;
     font-size: 1.15rem;
     flex-shrink: 0;
-    box-shadow: 0 6px 14px -3px rgba(0, 82, 255, 0.45);
+    box-shadow: 0 6px 14px -3px rgba(15, 23, 42, 0.25);
   }
 
   .privilege-content .privilege-tag {
     font-size: 0.72rem;
     font-weight: 800;
-    color: #0052FF;
+    color: #0f172a;
     letter-spacing: 0.6px;
     text-transform: uppercase;
   }
@@ -188,7 +194,7 @@ const loginStyles = `
   }
 
   .rating-stars {
-    color: #0052FF;
+    color: #0f172a;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
@@ -225,8 +231,8 @@ const loginStyles = `
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: #eff6ff;
-    color: #0052FF;
+    background: #f1f5f9;
+    color: #0f172a;
     font-size: 0.72rem;
     font-weight: 700;
     display: flex;
@@ -258,7 +264,7 @@ const loginStyles = `
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #0052FF;
+    color: #0f172a;
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.8px;
@@ -367,7 +373,7 @@ const loginStyles = `
   }
 
   .forgot-link {
-    color: #0052FF;
+    color: #0f172a;
     font-size: 0.78rem;
     font-weight: 600;
     text-decoration: none;
@@ -412,8 +418,8 @@ const loginStyles = `
   .input-wrapper input:focus {
     outline: none;
     background: #ffffff;
-    border-color: #0052FF;
-    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
+    border-color: #0f172a;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
   }
 
   .input-wrapper input::placeholder {
@@ -465,7 +471,7 @@ const loginStyles = `
   .remember-wrapper input[type='checkbox'] {
     width: 15px;
     height: 15px;
-    accent-color: #0052FF;
+    accent-color: #0f172a;
     cursor: pointer;
   }
 
@@ -482,14 +488,14 @@ const loginStyles = `
   .submit-drive-btn {
     width: 100%;
     padding: 12px 18px;
-    background: #0052FF;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     border: none;
     color: #ffffff;
     border-radius: 10px;
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 10px 22px -5px rgba(0, 82, 255, 0.42);
+    box-shadow: 0 10px 22px -5px rgba(15, 23, 42, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -498,9 +504,9 @@ const loginStyles = `
   }
 
   .submit-drive-btn:hover {
-    background: #0043D6;
+    background: #000000;
     transform: translateY(-1px);
-    box-shadow: 0 14px 26px -5px rgba(0, 82, 255, 0.5);
+    box-shadow: 0 14px 26px -5px rgba(15, 23, 42, 0.35);
   }
 
   .submit-drive-btn:active {
@@ -531,7 +537,7 @@ const loginStyles = `
   }
 
   .otp-action:hover {
-    color: #0052FF;
+    color: #0f172a;
   }
 
   /* Bottom Switch & Legal */
@@ -545,8 +551,13 @@ const loginStyles = `
   .signup-link-btn {
     background: none;
     border: none;
-    color: #0052FF;
+    color: #0f172a;
     font-weight: 700;
+    margin-left: 4px;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.84rem;
+  }
     margin-left: 4px;
     cursor: pointer;
     text-decoration: none;
@@ -644,9 +655,9 @@ function Login({ onLoginSuccess, onSwitchToRegister, onBackToFleet }) {
             </p>
 
             <div className="feature-pills">
-              <span className="feature-pill">📱 Instant Keyless Mobile Unlock</span>
-              <span className="feature-pill">📅 Free Cancellation up to 24h</span>
-              <span className="feature-pill">🛡️ Fully Insured & 24/7 VIP Concierge</span>
+              <span className="feature-pill">Instant Keyless Mobile Unlock</span>
+              <span className="feature-pill">Free Cancellation up to 24h</span>
+              <span className="feature-pill">Fully Insured & 24/7 VIP Concierge</span>
             </div>
           </div>
 
@@ -654,7 +665,11 @@ function Login({ onLoginSuccess, onSwitchToRegister, onBackToFleet }) {
           <div className="showcase-content">
             {/* Privilege Tier Banner */}
             <div className="privilege-banner">
-              <div className="privilege-icon">⚡</div>
+              <div className="privilege-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </div>
               <div className="privilege-content">
                 <div className="privilege-tag">Privilege Tier</div>
                 <div className="privilege-text">
@@ -666,8 +681,11 @@ function Login({ onLoginSuccess, onSwitchToRegister, onBackToFleet }) {
             {/* Testimonial Card */}
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <span className="rating-stars">
-                  ★★★★★ <span className="rating-score">4.98 / 5</span>
+                <span className="rating-stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <IconStar key={s} size={12} color="#0f172a" />
+                  ))}
+                  <span className="rating-score">4.98 / 5</span>
                 </span>
                 <span className="rating-cities">120,000+ Drivers Across 45 Cities</span>
               </div>
@@ -770,14 +788,14 @@ function Login({ onLoginSuccess, onSwitchToRegister, onBackToFleet }) {
           {/* Alert messages */}
           {errorMsg && (
             <div className="alert-banner alert-error">
-              <span>⚠️</span>
+              <span>Notice:</span>
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
             <div className="alert-banner alert-success">
-              <span>✅</span>
+              <span>Success:</span>
               <span>{successMsg}</span>
             </div>
           )}
@@ -889,7 +907,10 @@ function Login({ onLoginSuccess, onSwitchToRegister, onBackToFleet }) {
             {/* Submit Button */}
             <button type="submit" className="submit-drive-btn" disabled={loading}>
               <span>{loading ? 'Authenticating...' : 'Sign In to Drive'}</span>
-              <span>➔</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
             </button>
           </form>
 

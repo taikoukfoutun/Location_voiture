@@ -42,6 +42,14 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'avatar',
+        'phone',
+        'national_id',
+        'license_number',
+        'license_expiry',
+        'address',
+        'license_document',
+        'license_uploaded',
     ];
 
     /**
@@ -64,6 +72,13 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'license_uploaded' => 'boolean',
+            'license_expiry' => 'date',
         ];
+    }
+
+    public function rentals()
+    {
+        return $this->hasMany(Rental::class);
     }
 }

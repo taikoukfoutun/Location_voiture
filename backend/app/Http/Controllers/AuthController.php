@@ -51,6 +51,14 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role ?? 'user',
+                'avatar' => $user->avatar,
+                'phone' => $user->phone,
+                'national_id' => $user->national_id,
+                'license_number' => $user->license_number,
+                'license_expiry' => $user->license_expiry,
+                'address' => $user->address,
+                'license_document' => $user->license_document,
+                'license_uploaded' => (bool)$user->license_uploaded,
                 'created_at' => $user->created_at,
             ]
         ], 201);
@@ -95,6 +103,15 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role ?? 'user',
+                'avatar' => $user->avatar,
+                'phone' => $user->phone,
+                'national_id' => $user->national_id,
+                'license_number' => $user->license_number,
+                'license_expiry' => $user->license_expiry,
+                'address' => $user->address,
+                'license_document' => $user->license_document,
+                'license_uploaded' => (bool)$user->license_uploaded,
+                'created_at' => $user->created_at,
             ]
         ]);
     }
