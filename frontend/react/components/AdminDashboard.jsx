@@ -10,8 +10,33 @@ import {
   deleteGestionnaire,
   getReservations,
   updateReservationStatus,
+  getContactMessages,
+  updateContactMessageStatus,
+  deleteContactMessage,
 } from '../db';
 import defaultCarBg from '../assets/luxury_coastal_car.jpg';
+
+const IconMail = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+    <polyline points="22,6 12,13 2,6" />
+  </svg>
+);
+
+const IconReply = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 17 4 12 9 7" />
+    <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+  </svg>
+);
+
+const IconExternalLink = ({ size = 16, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);
 
 const IconClose = ({ size = 16, color = 'currentColor' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -319,60 +344,101 @@ const adminDashboardStyles = `
     color: #ffffff;
   }
 
+  /* ---- Reservation Status Badges (dark monochrome palette) ---- */
   .badge-res-pending {
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    color: #b45309;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.74rem;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.06em;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+  }
+  .badge-res-pending::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #94a3b8;
+    display: inline-block;
+    flex-shrink: 0;
   }
 
   .badge-res-confirmed {
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    color: #059669;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.74rem;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #f8fafc;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.06em;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+  }
+  .badge-res-confirmed::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: inline-block;
+    flex-shrink: 0;
   }
 
   .badge-res-rejected {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #dc2626;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.74rem;
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: #d4d4d8;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.06em;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+  }
+  .badge-res-rejected::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #71717a;
+    display: inline-block;
+    flex-shrink: 0;
   }
 
   .badge-res-completed {
-    background: #f1f5f9;
+    background: #f8fafc;
     border: 1px solid #cbd5e1;
     color: #475569;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.74rem;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.06em;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+  }
+  .badge-res-completed::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #94a3b8;
+    display: inline-block;
+    flex-shrink: 0;
   }
 
   .btn-action-inspect {
@@ -392,9 +458,9 @@ const adminDashboardStyles = `
   }
 
   .btn-action-accept {
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    color: #059669;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #f8fafc;
     padding: 7px 14px;
     border-radius: 8px;
     font-size: 0.8rem;
@@ -404,13 +470,13 @@ const adminDashboardStyles = `
   }
 
   .btn-action-accept:hover {
-    background: #d1fae5;
+    background: #1e293b;
   }
 
   .btn-action-reject {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #dc2626;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
     padding: 7px 14px;
     border-radius: 8px;
     font-size: 0.8rem;
@@ -420,7 +486,9 @@ const adminDashboardStyles = `
   }
 
   .btn-action-reject:hover {
-    background: #fee2e2;
+    background: #f1f5f9;
+    border-color: #0f172a;
+    color: #0f172a;
   }
 
   /* Issue Modal Bespoke UI */
@@ -1165,6 +1233,150 @@ const adminDashboardStyles = `
   }
 
   /* Empty State & Loading State */
+  .fleet-table-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px -2px rgba(15, 23, 42, 0.04);
+  }
+
+  .fleet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .fleet-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .fleet-table thead th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .fleet-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.14s ease;
+  }
+
+  .fleet-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .fleet-table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .fleet-table tbody td {
+    padding: 18px 20px;
+    vertical-align: middle;
+    color: #334155;
+  }
+
+  /* Message status badges */
+  .badge-msg-unread {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-msg-unread::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #94a3b8;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .badge-msg-read {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-msg-read::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .badge-msg-replied {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #f8fafc;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-msg-replied::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #94a3b8;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* Registered vs Guest visitor tag */
+  .member-tag-registered {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 5px;
+    background: #0f172a;
+    color: #e2e8f0;
+    border: 1px solid #1e293b;
+    white-space: nowrap;
+  }
+  .member-tag-guest {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 5px;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+
   .empty-fleet-container {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -1548,6 +1760,111 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
   });
   const [gestToDelete, setGestToDelete] = useState(null);
 
+  // =========================================================
+  // CLIENT MESSAGES & CONCIERGE INQUIRIES STATE (STEP 3 & 4)
+  // =========================================================
+  const [messages, setMessages] = useState([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [msgFilter, setMsgFilter] = useState('all');
+  const [msgSearch, setMsgSearch] = useState('');
+  const [msgCounts, setMsgCounts] = useState({ all: 0, unread: 0, read: 0, replied: 0, archived: 0 });
+  const [selectedMsgForInspection, setSelectedMsgForInspection] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [msgActionLoading, setMsgActionLoading] = useState(false);
+
+  const loadMessages = async (statusOverride, searchOverride) => {
+    setMessagesLoading(true);
+    try {
+      const activeStatus = statusOverride !== undefined ? statusOverride : msgFilter;
+      const activeSearch = searchOverride !== undefined ? searchOverride : msgSearch;
+      const res = await getContactMessages({
+        status: activeStatus !== 'all' ? activeStatus : undefined,
+        search: activeSearch.trim() || undefined,
+      });
+      setMessages(res.data || []);
+      if (res.counts) setMsgCounts(res.counts);
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Error loading contact messages.' });
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMessages();
+  }, [msgFilter]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadMessages(msgFilter, msgSearch);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [msgSearch]);
+
+  const handleInspectMessage = async (msg) => {
+    setSelectedMsgForInspection(msg);
+    setReplyText(msg.admin_reply || '');
+    if (msg.status === 'unread') {
+      try {
+        await updateContactMessageStatus(msg.id, { status: 'read' });
+        setMessages((prev) =>
+          prev.map((m) => (m.id === msg.id ? { ...m, status: 'read' } : m))
+        );
+        setMsgCounts((prev) => ({
+          ...prev,
+          unread: Math.max(0, prev.unread - 1),
+          read: prev.read + 1,
+        }));
+        setSelectedMsgForInspection((prev) => (prev ? { ...prev, status: 'read' } : prev));
+      } catch (err) {
+        console.error('Failed to mark message as read:', err);
+      }
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!selectedMsgForInspection || !replyText.trim()) return;
+    setMsgActionLoading(true);
+    try {
+      await updateContactMessageStatus(selectedMsgForInspection.id, {
+        admin_reply: replyText.trim(),
+        user_id: user?.id || null,
+        replied_by: user?.id || null,
+        status: 'replied',
+      });
+      setAlert({
+        type: 'success',
+        message: `Inquiry #${selectedMsgForInspection.id} from ${selectedMsgForInspection.name} marked as Replied. Response recorded in concierge log.`,
+      });
+      setSelectedMsgForInspection(null);
+      setReplyText('');
+      await loadMessages();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Failed to submit reply.' });
+    } finally {
+      setMsgActionLoading(false);
+    }
+  };
+
+  const handleDeleteMessage = async (msg) => {
+    if (!window.confirm(`Are you sure you want to delete inquiry #${msg.id} from ${msg.name}?`)) {
+      return;
+    }
+    try {
+      await deleteContactMessage(msg.id);
+      setAlert({
+        type: 'success',
+        message: `Inquiry #${msg.id} permanently deleted.`,
+      });
+      if (selectedMsgForInspection?.id === msg.id) {
+        setSelectedMsgForInspection(null);
+      }
+      await loadMessages();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Failed to delete inquiry.' });
+    }
+  };
+
   useEffect(() => {
     loadFleet();
   }, [statusFilter, categoryFilter]);
@@ -1899,6 +2216,8 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
               <h1>
                 {activeTab === 'reservations'
                   ? 'Reservations & Driver Verification'
+                  : activeTab === 'messages'
+                  ? 'Client Messages & Concierge Inquiries'
                   : activeTab === 'gestionnaires'
                   ? 'Staff & Gestionnaires Directory'
                   : 'Fleet Management Hub'}
@@ -1975,6 +2294,28 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
               }}
             >
               {resCounts.pending > 0 ? `${resCounts.pending} Pending` : reservations.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className={`admin-tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('messages');
+              loadMessages();
+            }}
+          >
+            <IconMail size={15} />
+            <span>Client Messages</span>
+            <span
+              className="admin-tab-count"
+              style={{
+                background: msgCounts.unread > 0 ? '#ef4444' : undefined,
+                color: msgCounts.unread > 0 ? '#ffffff' : undefined,
+                fontWeight: msgCounts.unread > 0 ? 800 : undefined,
+              }}
+            >
+              {msgCounts.unread > 0 ? `${msgCounts.unread} unread` : messages.length}
             </span>
           </button>
 
@@ -2212,10 +2553,10 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                           </td>
 
                           <td>
-                            {isPending && <span className="badge-res-pending">● Pending Review</span>}
-                            {isConfirmed && <span className="badge-res-confirmed">✓ Confirmed (Rented)</span>}
-                            {isRejected && <span className="badge-res-rejected">✕ Action Required</span>}
-                            {isCompleted && <span className="badge-res-completed">○ Completed</span>}
+                            {isPending && <span className="badge-res-pending">Pending Review</span>}
+                            {isConfirmed && <span className="badge-res-confirmed">Confirmed</span>}
+                            {isRejected && <span className="badge-res-rejected">Action Required</span>}
+                            {isCompleted && <span className="badge-res-completed">Completed</span>}
                           </td>
 
                           <td style={{ textAlign: 'right' }}>
@@ -2578,6 +2919,252 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                     </div>
                   );
                 })
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================
+            VIEW 3: CLIENT MESSAGES & CONCIERGE INQUIRIES (STEP 3)
+            ========================================================= */}
+        {activeTab === 'messages' && (
+          <div>
+            {/* Metric Strip */}
+            <section className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Total Inquiries</h3>
+                  <span className="stat-indicator-dot dot-total"></span>
+                </div>
+                <div className="stat-number">{String(msgCounts.all || messages.length).padStart(2, '0')}</div>
+                <div className="stat-subtext">All Lifetime Inquiries</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Unread Messages</h3>
+                  <span className="stat-indicator-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }}></span>
+                </div>
+                <div className="stat-number" style={{ color: msgCounts.unread > 0 ? '#dc2626' : '#0f172a' }}>
+                  {String(msgCounts.unread).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Awaiting Response</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Replied Inquiries</h3>
+                  <span className="stat-indicator-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
+                </div>
+                <div className="stat-number" style={{ color: '#059669' }}>
+                  {String(msgCounts.replied).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Concierge Replies Logged</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Read / In Progress</h3>
+                  <span className="stat-indicator-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#64748b', display: 'inline-block' }}></span>
+                </div>
+                <div className="stat-number" style={{ color: '#475569' }}>
+                  {String(msgCounts.read).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Opened &amp; Reviewed</div>
+              </div>
+            </section>
+
+            {/* Toolbar for Messages (Filter & Search Bar) */}
+            <section className="toolbar-card">
+              <div className="filter-group">
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${msgFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => {
+                      setMsgFilter('all');
+                      loadMessages('all');
+                    }}
+                  >
+                    All Messages ({msgCounts.all})
+                  </button>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${msgFilter === 'unread' ? 'active' : ''}`}
+                    style={msgFilter === 'unread' ? { background: '#f59e0b', borderColor: '#f59e0b', color: '#ffffff', fontWeight: 700 } : {}}
+                    onClick={() => {
+                      setMsgFilter('unread');
+                      loadMessages('unread');
+                    }}
+                  >
+                    Unread ({msgCounts.unread})
+                  </button>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${msgFilter === 'read' ? 'active' : ''}`}
+                    onClick={() => {
+                      setMsgFilter('read');
+                      loadMessages('read');
+                    }}
+                  >
+                    Read ({msgCounts.read})
+                  </button>
+                  <button
+                    type="button"
+                    className={`res-filter-pill ${msgFilter === 'replied' ? 'active' : ''}`}
+                    onClick={() => {
+                      setMsgFilter('replied');
+                      loadMessages('replied');
+                    }}
+                  >
+                    Replied ({msgCounts.replied})
+                  </button>
+                </div>
+
+                <form onSubmit={(e) => { e.preventDefault(); loadMessages(msgFilter, msgSearch); }} className="search-input-wrap" style={{ minWidth: '320px' }}>
+                  <span className="search-icon"><IconSearch size={15} /></span>
+                  <input
+                    type="text"
+                    placeholder="Search client name, email, phone, or message..."
+                    value={msgSearch}
+                    onChange={(e) => setMsgSearch(e.target.value)}
+                  />
+                </form>
+              </div>
+            </section>
+
+            {/* Inquiries Table */}
+            <div className="fleet-table-container">
+              {messagesLoading ? (
+                <div className="loading-fleet-container">
+                  Loading concierge inquiries and client messages...
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="empty-fleet-container">
+                  <div className="empty-fleet-icon"><IconMail size={28} /></div>
+                  <h3>No Messages Found</h3>
+                  <p>When clients or visitors submit concierge inquiries via the public fleet showcase, they will appear here for review and direct email reply.</p>
+                </div>
+              ) : (
+                <table className="fleet-table">
+                  <thead>
+                    <tr>
+                      <th>Client Info</th>
+                      <th>Subject &amp; Snippet</th>
+                      <th>Status Tag</th>
+                      <th>Date &amp; Time</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {messages.map((msg) => {
+                      const isUnread = msg.status === 'unread';
+                      const isRead = msg.status === 'read';
+                      const isReplied = msg.status === 'replied';
+
+                      return (
+                        <tr key={msg.id}>
+                          {/* Client Info */}
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{
+                                width: 38,
+                                height: 38,
+                                borderRadius: '50%',
+                                background: '#0f172a',
+                                color: '#ffffff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 800,
+                                fontSize: '0.9rem',
+                                flexShrink: 0
+                              }}>
+                                {(msg.name || 'C').charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                  <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.9rem' }}>
+                                    {msg.name || 'Anonymous Client'}
+                                  </span>
+                                  {msg.user_id ? (
+                                    <span className="member-tag-registered">Registered Member</span>
+                                  ) : (
+                                    <span className="member-tag-guest">Guest Visitor</span>
+                                  )}
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                                  <a href={`mailto:${msg.email}`} style={{ color: 'inherit', textDecoration: 'none' }} onClick={(e) => e.stopPropagation()}>
+                                    {msg.email}
+                                  </a>
+                                  {msg.phone && (
+                                    <span> • {msg.phone}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Subject & Snippet */}
+                          <td>
+                            <div style={{ maxWidth: '340px' }}>
+                              <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem', marginBottom: '3px' }}>
+                                {msg.subject || 'Concierge Rental Inquiry'}
+                              </div>
+                              <div style={{
+                                fontSize: '0.78rem',
+                                color: '#64748b',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {msg.message}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Status Tag */}
+                          <td>
+                            {isUnread && <span className="badge-msg-unread">Unread</span>}
+                            {isRead && <span className="badge-msg-read">Read</span>}
+                            {isReplied && <span className="badge-msg-replied">Replied</span>}
+                          </td>
+
+                          {/* Date & Time */}
+                          <td>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#0f172a' }}>
+                              {new Date(msg.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                              {new Date(msg.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </td>
+
+                          {/* Actions */}
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                              <button
+                                type="button"
+                                className="btn-action-inspect"
+                                onClick={() => handleInspectMessage(msg)}
+                              >
+                                Inspect &amp; Reply
+                              </button>
+                              <button
+                                type="button"
+                                className="action-btn action-delete"
+                                title="Delete inquiry"
+                                onClick={() => handleDeleteMessage(msg)}
+                              >
+                                <IconTrash size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
@@ -3320,6 +3907,271 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================
+            INQUIRY INSPECTION & DIRECT EMAIL REPLY MODAL (STEP 4)
+            ========================================================= */}
+        {selectedMsgForInspection && (
+          <div className="modal-overlay" onClick={() => setSelectedMsgForInspection(null)}>
+            <div
+              className="modal-card"
+              style={{ maxWidth: '680px', width: '92%' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: '12px',
+                    background: '#0f172a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff'
+                  }}>
+                    <IconMail size={20} />
+                  </div>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                      Inquiry #{selectedMsgForInspection.id}
+                    </h2>
+                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0 0' }}>
+                      Submitted {new Date(selectedMsgForInspection.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="close-modal-btn"
+                  onClick={() => setSelectedMsgForInspection(null)}
+                >
+                  <IconClose size={16} />
+                </button>
+              </div>
+
+              {/* Full Inspection Card: Sender Details */}
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '14px',
+                padding: '16px 20px',
+                marginBottom: '18px'
+              }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '12px',
+                  fontSize: '0.86rem'
+                }}>
+                  <div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                      Client Name
+                    </span>
+                    <strong style={{ color: '#0f172a' }}>{selectedMsgForInspection.name}</strong>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                      Email Address
+                    </span>
+                    <a href={`mailto:${selectedMsgForInspection.email}`} style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>
+                      {selectedMsgForInspection.email}
+                    </a>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                      Phone / WhatsApp
+                    </span>
+                    <span style={{ color: '#0f172a', fontWeight: 600 }}>
+                      {selectedMsgForInspection.phone || 'Not provided'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                      Membership Status
+                    </span>
+                    {selectedMsgForInspection.user_id ? (
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        color: '#3730a3'
+                      }}>
+                        ● Registered Member (#{selectedMsgForInspection.user_id})
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+                        Guest Visitor
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                    Inquiry Subject
+                  </span>
+                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.94rem' }}>
+                    {selectedMsgForInspection.subject || 'Concierge Rental Inquiry'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Dedicated Message Quote Bubble */}
+              <div style={{ marginBottom: '18px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '6px' }}>
+                  Original Client Message
+                </span>
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderLeft: '4px solid #0f172a',
+                  borderRadius: '0 12px 12px 0',
+                  padding: '16px 20px',
+                  color: '#1e293b',
+                  fontSize: '0.92rem',
+                  lineHeight: '1.65',
+                  whiteSpace: 'pre-wrap',
+                  boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)'
+                }}>
+                  "{selectedMsgForInspection.message}"
+                </div>
+              </div>
+
+              {/* Direct Email Actions: Open in Email Client (Mailto) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '10px',
+                marginBottom: '18px'
+              }}>
+                <div style={{ fontSize: '0.82rem', color: '#166534' }}>
+                  <strong>External Dispatch:</strong> Launch your preferred email software with pre-filled greeting and quote.
+                </div>
+                <a
+                  href={`mailto:${selectedMsgForInspection.email}?subject=${encodeURIComponent(
+                    `Re: ${selectedMsgForInspection.subject || 'Concierge Inquiry'} — Prestige Motors Concierge`
+                  )}&body=${encodeURIComponent(
+                    `Dear ${selectedMsgForInspection.name},\n\nThank you for contacting Prestige Motors Concierge Desk regarding "${selectedMsgForInspection.subject || 'your inquiry'}".\n\nRegarding your request:\n> "${selectedMsgForInspection.message}"\n\nOur concierge team is at your immediate service. Please let us know if you require bespoke tarmac delivery, special options, or customized handover.\n\nWarm regards,\nPrestige Motors Concierge Service\nBoulevard de la Corniche, Marina Bay\nTel: +33 (0) 1 42 68 55 00\nconcierge@prestige-motors.com`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    background: '#15803d',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    textDecoration: 'none',
+                    flexShrink: 0,
+                    boxShadow: '0 2px 6px rgba(21, 128, 61, 0.2)'
+                  }}
+                >
+                  <IconMail size={14} />
+                  <span>Open in Email Client (Mailto)</span>
+                  <IconExternalLink size={12} />
+                </a>
+              </div>
+
+              {/* In-Dashboard Reply & Log Composer */}
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: '#0f172a' }}>
+                    In-Dashboard Reply &amp; Record Log
+                  </label>
+                  {selectedMsgForInspection.replied_at && (
+                    <span style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 600 }}>
+                      ✓ Previously replied {new Date(selectedMsgForInspection.replied_at).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+                <textarea
+                  rows={4}
+                  className="issue-textarea"
+                  placeholder="Type the official concierge reply or internal resolution notes to store in this client inquiry file..."
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.88rem',
+                    fontFamily: 'inherit',
+                    color: '#0f172a',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              {/* Modal Actions */}
+              <div className="modal-actions" style={{ justifyContent: 'space-between' }}>
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => setSelectedMsgForInspection(null)}
+                >
+                  Cancel &amp; Close
+                </button>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    className="action-delete-btn"
+                    style={{
+                      padding: '10px 18px',
+                      background: '#fee2e2',
+                      color: '#b91c1c',
+                      border: '1px solid #fecaca',
+                      fontWeight: 700,
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => handleDeleteMessage(selectedMsgForInspection)}
+                  >
+                    Delete Inquiry
+                  </button>
+
+                  <button
+                    type="button"
+                    style={{
+                      padding: '10px 22px',
+                      background: '#0f172a',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '0.86rem',
+                      cursor: replyText.trim() ? 'pointer' : 'not-allowed',
+                      opacity: replyText.trim() ? 1 : 0.6,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    disabled={msgActionLoading || !replyText.trim()}
+                    onClick={handleSendReply}
+                  >
+                    <IconReply size={15} />
+                    <span>{msgActionLoading ? 'Saving Reply...' : 'Send & Mark as Replied'}</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

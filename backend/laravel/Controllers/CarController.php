@@ -28,7 +28,7 @@ class CarController extends Controller
     }
 
     /**
-     * Safely save uploaded car image, with fallback for Windows / OneDrive permissions.
+     *  save uploaded car image, with fallback for Windows / OneDrive permissions.
      */
     protected function saveUploadedCarImage($file, string $targetDir, string $fileName): void
     {

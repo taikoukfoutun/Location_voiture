@@ -411,6 +411,230 @@ const showcaseStyles = `
     background: #fee2e2;
   }
 
+  /* ---- Nav chip: clickable version ---- */
+  .user-badge-pill--clickable {
+    cursor: pointer;
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    padding: 5px 14px 5px 6px;
+    border-radius: 30px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .user-badge-pill--clickable:hover {
+    border-color: #94a3b8;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.10);
+  }
+
+  /* Avatar image in nav chip */
+  .nav-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+  }
+
+  /* ================= PROFILE SIDEBAR ================= */
+  .profile-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(9, 10, 15, 0.42);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+  }
+  .profile-sidebar-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .profile-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 360px;
+    max-width: 92vw;
+    height: 100%;
+    background: #ffffff;
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -6px 0 40px rgba(9, 10, 15, 0.14);
+    transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+  }
+  .profile-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .profile-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px 18px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .profile-sidebar-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+  .profile-sidebar-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .profile-sidebar-close:hover {
+    color: #090a0f;
+    background: #f1f5f9;
+  }
+
+  .profile-sidebar-identity {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 28px 24px 22px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .profile-avatar-large {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #090a0f;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .profile-avatar-initial {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .profile-identity-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+  .profile-full-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #090a0f;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .profile-identity-email {
+    font-size: 0.82rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .profile-identity-phone {
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
+
+  .profile-sidebar-details {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .profile-detail-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .profile-detail-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    min-width: 72px;
+    flex-shrink: 0;
+  }
+  .profile-detail-value {
+    font-size: 0.84rem;
+    color: #334155;
+    font-weight: 500;
+  }
+  .profile-detail-role {
+    display: inline-block;
+    background: #f1f5f9;
+    border: 1px solid var(--border-subtle);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  .profile-sidebar-btn-reservations {
+    margin: 24px 24px 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 20px;
+    background: #090a0f;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.14s ease;
+    letter-spacing: 0.01em;
+  }
+  .profile-sidebar-btn-reservations:hover {
+    background: #1e2430;
+    transform: translateY(-1px);
+  }
+
+  .profile-sidebar-signout {
+    margin: 14px 24px 32px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #dc2626;
+    text-align: left;
+    padding: 8px 0;
+    transition: color 0.15s ease;
+    letter-spacing: 0.01em;
+  }
+  .profile-sidebar-signout:hover {
+    color: #b91c1c;
+  }
+
   /* ================= HERO SECTION (LIGHT LUXURY) ================= */
   .hero-section {
     position: relative;
@@ -1280,6 +1504,10 @@ const showcaseStyles = `
     box-shadow: 0 6px 22px rgba(15, 23, 42, 0.25);
   }
 
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
   /* ================= FOOTER (LIGHT LUXURY) ================= */
   .public-footer {
     background: #ffffff;
@@ -1790,12 +2018,26 @@ export default function FleetShowcase({
   const [contactData, setContactData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: '',
+    phone: user?.phone || '',
+    subject: 'General Inquiry',
     message: '',
   });
   const [contactSuccess, setContactSuccess] = useState(false);
   const [submittingContact, setSubmittingContact] = useState(false);
   const [contactError, setContactError] = useState('');
+  const [profileSidebarOpen, setProfileSidebarOpen] = useState(false);
+
+  // Auto-fill contact info if authenticated user changes or logs in
+  useEffect(() => {
+    if (user) {
+      setContactData((prev) => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || '',
+      }));
+    }
+  }, [user]);
 
   // Fetch Fleet from Laravel Backend
   useEffect(() => {
@@ -1961,12 +2203,19 @@ export default function FleetShowcase({
         name: contactData.name,
         email: contactData.email,
         phone: contactData.phone,
+        subject: contactData.subject || 'General Inquiry',
         message: contactData.message,
       });
       setContactSuccess(true);
       setTimeout(() => {
         setContactSuccess(false);
-        setContactData({ name: user?.name || '', email: user?.email || '', phone: '', message: '' });
+        setContactData({
+          name: user?.name || '',
+          email: user?.email || '',
+          phone: user?.phone || '',
+          subject: 'General Inquiry',
+          message: '',
+        });
       }, 5000);
     } catch (err) {
       setContactError(err.message || 'Failed to submit concierge request. Please try again.');
@@ -2028,14 +2277,25 @@ export default function FleetShowcase({
             <div className="nav-actions">
               {user ? (
                 <>
-                  <div className="user-badge-pill">
+                  {/* Single chip — clicking opens profile sidebar */}
+                  <button
+                    type="button"
+                    className="user-badge-pill user-badge-pill--clickable"
+                    onClick={() => setProfileSidebarOpen(true)}
+                    aria-label="Open profile panel"
+                  >
                     <div className="user-avatar-mini">
-                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={user.name || 'Profile'} className="nav-avatar-img" />
+                      ) : (
+                        <span>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
+                      )}
                     </div>
                     <span className="user-name-mini">{user.name || 'Member'}</span>
-                  </div>
+                  </button>
 
-                  {user.role === 'admin' || user.role === 'gestionnaire' ? (
+                  {/* Admin Portal button stays in navbar for staff */}
+                  {(user.role === 'admin' || user.role === 'gestionnaire') && (
                     <button
                       type="button"
                       className="btn-nav-portal"
@@ -2044,24 +2304,7 @@ export default function FleetShowcase({
                       <IconSliders size={15} />
                       <span>Admin Portal</span>
                     </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="btn-nav-portal"
-                      onClick={onOpenUserPortal}
-                    >
-                      <IconIdBadge size={15} />
-                      <span>My Profile & Docs</span>
-                    </button>
                   )}
-
-                  <button
-                    type="button"
-                    className="btn-nav-signout"
-                    onClick={onLogout}
-                  >
-                    Sign Out
-                  </button>
                 </>
               ) : (
                 <>
@@ -2441,7 +2684,7 @@ export default function FleetShowcase({
                     </div>
                   </div>
                   <h4 style={{ fontWeight: 800, marginBottom: '6px', color: '#166534', fontSize: '1.1rem' }}>Inquiry Transmitted Successfully</h4>
-                  <p style={{ fontSize: '0.88rem', color: '#15803d' }}>Our head concierge will contact you shortly via private dispatch.</p>
+                  <p style={{ fontSize: '0.88rem', color: '#15803d' }}>Your concierge inquiry has been received. Our team will contact you shortly via email.</p>
                 </div>
               ) : (
                 <form onSubmit={handleContactSubmit}>
@@ -2470,15 +2713,32 @@ export default function FleetShowcase({
                     </div>
                   </div>
 
-                  <div className="contact-input-full">
-                    <label className="contact-label">Telephone / WhatsApp</label>
-                    <input
-                      type="tel"
-                      className="contact-field"
-                      placeholder="+33 6 00 00 00 00"
-                      value={contactData.phone}
-                      onChange={(e) => setContactData({ ...contactData, phone: e.target.value })}
-                    />
+                  <div className="contact-input-grid">
+                    <div>
+                      <label className="contact-label">Telephone / WhatsApp</label>
+                      <input
+                        type="tel"
+                        className="contact-field"
+                        placeholder="+33 6 00 00 00 00"
+                        value={contactData.phone}
+                        onChange={(e) => setContactData({ ...contactData, phone: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="contact-label">Inquiry Subject</label>
+                      <select
+                        className="contact-field"
+                        value={contactData.subject}
+                        onChange={(e) => setContactData({ ...contactData, subject: e.target.value })}
+                        style={{ background: '#ffffff', cursor: 'pointer' }}
+                      >
+                        <option value="General Inquiry">General Inquiry</option>
+                        <option value="Vehicle Availability & Rates">Vehicle Availability & Rates</option>
+                        <option value="VIP Chauffeur Service">VIP Chauffeur Service</option>
+                        <option value="Corporate Booking">Corporate Booking</option>
+                        <option value="Reservation Modification">Reservation Modification</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div className="contact-input-full">
@@ -2512,8 +2772,27 @@ export default function FleetShowcase({
                   )}
 
                   <button type="submit" className="btn-submit-contact" disabled={submittingContact}>
-                    <span>{submittingContact ? 'Transmitting Request...' : 'Transmit Concierge Request'}</span>
-                    <IconArrowRight size={15} />
+                    {submittingContact ? (
+                      <>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            width: 16,
+                            height: 16,
+                            border: '2px solid rgba(255, 255, 255, 0.3)',
+                            borderTopColor: '#ffffff',
+                            borderRadius: '50%',
+                            animation: 'spin 0.8s linear infinite',
+                          }}
+                        />
+                        <span>Transmitting Request...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Transmit Concierge Request</span>
+                        <IconArrowRight size={15} />
+                      </>
+                    )}
                   </button>
                 </form>
               )}
@@ -3187,6 +3466,98 @@ export default function FleetShowcase({
           </div>
         )}
       </div>
+
+      {/* ================= PROFILE SIDEBAR ================= */}
+      {user && (
+        <>
+          {/* Overlay — click to dismiss */}
+          <div
+            className={`profile-sidebar-overlay${profileSidebarOpen ? ' visible' : ''}`}
+            onClick={() => setProfileSidebarOpen(false)}
+            aria-hidden="true"
+          />
+
+          <aside className={`profile-sidebar${profileSidebarOpen ? ' open' : ''}`} aria-label="Account panel">
+            {/* Header */}
+            <div className="profile-sidebar-header">
+              <span className="profile-sidebar-title">Account</span>
+              <button
+                type="button"
+                className="profile-sidebar-close"
+                onClick={() => setProfileSidebarOpen(false)}
+                aria-label="Close panel"
+              >
+                <IconClose size={18} />
+              </button>
+            </div>
+
+            {/* Avatar + Name + Email */}
+            <div className="profile-sidebar-identity">
+              <div className="profile-avatar-large">
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name || 'Profile'} className="profile-avatar-img" />
+                ) : (
+                  <span className="profile-avatar-initial">
+                    {(user.name || 'U').charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="profile-identity-text">
+                <div className="profile-full-name">{user.name || 'Member'}</div>
+                <div className="profile-identity-email">{user.email}</div>
+                {user.phone && <div className="profile-identity-phone">{user.phone}</div>}
+              </div>
+            </div>
+
+            {/* Info rows */}
+            <div className="profile-sidebar-details">
+              {user.address && (
+                <div className="profile-detail-row">
+                  <span className="profile-detail-label">Address</span>
+                  <span className="profile-detail-value">{user.address}</span>
+                </div>
+              )}
+              {user.license_number && (
+                <div className="profile-detail-row">
+                  <span className="profile-detail-label">License</span>
+                  <span className="profile-detail-value">{user.license_number}</span>
+                </div>
+              )}
+              {user.license_expiry && (
+                <div className="profile-detail-row">
+                  <span className="profile-detail-label">Expiry</span>
+                  <span className="profile-detail-value">{user.license_expiry}</span>
+                </div>
+              )}
+              <div className="profile-detail-row">
+                <span className="profile-detail-label">Role</span>
+                <span className="profile-detail-value profile-detail-role">
+                  {user.role === 'admin' ? 'Administrator' : user.role === 'gestionnaire' ? 'Gestionnaire' : 'Client'}
+                </span>
+              </div>
+            </div>
+
+            {/* My Reservations CTA */}
+            <button
+              type="button"
+              className="profile-sidebar-btn-reservations"
+              onClick={() => { setProfileSidebarOpen(false); onOpenUserPortal(); }}
+            >
+              <span>My Reservations</span>
+              <IconArrowRight size={15} />
+            </button>
+
+            {/* Sign Out */}
+            <button
+              type="button"
+              className="profile-sidebar-signout"
+              onClick={() => { setProfileSidebarOpen(false); onLogout(); }}
+            >
+              Sign Out
+            </button>
+          </aside>
+        </>
+      )}
     </>
   );
 }
