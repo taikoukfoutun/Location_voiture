@@ -6,6 +6,7 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\GestionnaireController;
 use App\Http\Controllers\RentalController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,12 @@ Route::get('/admin/gestionnaires', [GestionnaireController::class, 'index']);
 Route::post('/admin/gestionnaires', [GestionnaireController::class, 'store']);
 Route::put('/admin/gestionnaires/{id}', [GestionnaireController::class, 'update']);
 Route::delete('/admin/gestionnaires/{id}', [GestionnaireController::class, 'destroy']);
+
+// Registered Users Management Routes (Super Admin Only)
+Route::get('/admin/users', [UserController::class, 'index']);
+Route::put('/admin/users/{id}/status', [UserController::class, 'toggleStatus']);
+Route::post('/admin/users/{id}/status', [UserController::class, 'toggleStatus']);
+Route::delete('/admin/users/{id}', [UserController::class, 'destroy']);
 
 // Contact & Concierge Inquiries Routes
 Route::post('/contact', [ContactController::class, 'store']);

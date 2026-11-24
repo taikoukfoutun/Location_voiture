@@ -160,9 +160,8 @@ class CarController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified car in storage.
-     */
+    
+    
     public function update(Request $request, $id)
     {
         $car = Car::find($id);

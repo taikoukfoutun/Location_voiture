@@ -694,6 +694,79 @@ export async function deleteContactMessage(id) {
   }
 }
 
+/**
+ * Fetch all registered users (Super Admin only).
+ * 
+ * @param {Object} [params]
+ * @param {string} [params.search]
+ * @param {string} [params.status]
+ * @param {string} [params.role]
+ * @returns {Promise<Object>} { data: Array, counts: Object }
+ */
+export async function getAdminUsers(params = {}) {
+  const query = new URLSearchParams();
+  if (params.search) query.append('search', params.search);
+  if (params.status && params.status !== 'all') query.append('status', params.status);
+  if (params.role) query.append('role', params.role);
+
+  const response = await fetch(`${API_BASE_URL}/admin/users?${query.toString()}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to fetch registered users.');
+  }
+  return data;
+}
+
+/**
+ * Toggle active/deactivated status of a user (Super Admin only).
+ * 
+ * @param {number|string} id
+ * @param {boolean} [isActive]
+ * @returns {Promise<Object>}
+ */
+export async function toggleUserStatus(id, isActive) {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${id}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(typeof isActive === 'boolean' ? { is_active: isActive } : {}),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to update user status.');
+  }
+  return data;
+}
+
+/**
+ * Delete a user account (Super Admin only).
+ * 
+ * @param {number|string} id
+ * @returns {Promise<Object>}
+ */
+export async function deleteUserAccount(id) {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to delete user account.');
+  }
+  return data;
+}
+
 export default {
   registerUser,
   loginUser,
@@ -718,4 +791,7 @@ export default {
   getContactMessages,
   updateContactMessageStatus,
   deleteContactMessage,
+  getAdminUsers,
+  toggleUserStatus,
+  deleteUserAccount,
 };

@@ -51,6 +51,15 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role ?? 'user',
+                'avatar' => $user->avatar,
+                'phone' => $user->phone,
+                'national_id' => $user->national_id,
+                'license_number' => $user->license_number,
+                'license_expiry' => $user->license_expiry,
+                'address' => $user->address,
+                'license_document' => $user->license_document,
+                'license_uploaded' => (bool)$user->license_uploaded,
+                'is_active' => (bool)$user->is_active,
                 'created_at' => $user->created_at,
             ]
         ], 201);
@@ -87,6 +96,13 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if (isset($user->is_active) && !$user->is_active) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Your account has been deactivated by administration. Please contact concierge support.'
+            ], 403);
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Login successful!',
@@ -95,6 +111,16 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role ?? 'user',
+                'avatar' => $user->avatar,
+                'phone' => $user->phone,
+                'national_id' => $user->national_id,
+                'license_number' => $user->license_number,
+                'license_expiry' => $user->license_expiry,
+                'address' => $user->address,
+                'license_document' => $user->license_document,
+                'license_uploaded' => (bool)$user->license_uploaded,
+                'is_active' => (bool)$user->is_active,
+                'created_at' => $user->created_at,
             ]
         ]);
     }

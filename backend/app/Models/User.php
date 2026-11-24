@@ -50,6 +50,7 @@ class User extends Authenticatable
         'address',
         'license_document',
         'license_uploaded',
+        'is_active',
     ];
 
     /**
@@ -73,6 +74,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'license_uploaded' => 'boolean',
+            'is_active' => 'boolean',
             'license_expiry' => 'date',
         ];
     }

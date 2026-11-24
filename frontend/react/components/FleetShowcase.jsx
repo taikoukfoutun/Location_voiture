@@ -3,9 +3,7 @@ import { getCars, createReservation, getStoredUser, submitContactMessage } from 
 import defaultCarBg from '../assets/luxury_coastal_car.jpg';
 import supraHeroBg from '../assets/toyota_supra_hero.jpg';
 
-/* =========================================================
-   LUXURY MONOCHROME & METALLIC SVG ICON SUITE (ZERO EMOJIS)
-   ========================================================= */
+
 
 const IconAlert = ({ size = 18, color = 'currentColor' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1306,6 +1304,16 @@ const showcaseStyles = `
     box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
   }
 
+  .step-photo {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: block;
+    border: 1px solid var(--border-subtle);
+  }
+
   .step-title {
     font-size: 1.2rem;
     font-weight: 700;
@@ -2571,6 +2579,12 @@ export default function FleetShowcase({
             <div className="steps-grid">
               <div className="step-box">
                 <span className="step-number">01</span>
+                <img
+                  className="step-photo"
+                  src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800&q=85&auto=format&fit=crop"
+                  alt="Luxury supercar cockpit"
+                  loading="lazy"
+                />
                 <div className="step-icon-wrap">
                   <IconSearch size={22} />
                 </div>
@@ -2583,6 +2597,12 @@ export default function FleetShowcase({
 
               <div className="step-box">
                 <span className="step-number">02</span>
+                <img
+                  className="step-photo"
+                  src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=85&auto=format&fit=crop"
+                  alt="Digital identity verification on mobile"
+                  loading="lazy"
+                />
                 <div className="step-icon-wrap">
                   <IconIdBadge size={22} />
                 </div>
@@ -2598,6 +2618,12 @@ export default function FleetShowcase({
                 <div className="step-icon-wrap">
                   <IconKey size={22} />
                 </div>
+                <img
+                  className="step-photo"
+                  src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=85&auto=format&fit=crop"
+                  alt="Luxury vehicle at private handover"
+                  loading="lazy"
+                />
                 <h3 className="step-title">3. Delivery & Driving</h3>
                 <p className="step-text">
                   Receive your vehicle at our private showroom, private aviation terminal, or luxury hotel doorstep

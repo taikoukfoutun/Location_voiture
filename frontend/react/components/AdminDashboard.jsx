@@ -13,6 +13,9 @@ import {
   getContactMessages,
   updateContactMessageStatus,
   deleteContactMessage,
+  getAdminUsers,
+  toggleUserStatus,
+  deleteUserAccount,
 } from '../db';
 import defaultCarBg from '../assets/luxury_coastal_car.jpg';
 
@@ -439,6 +442,96 @@ const adminDashboardStyles = `
     background: #94a3b8;
     display: inline-block;
     flex-shrink: 0;
+  }
+
+  /* ---- User Account Status Badges (dark monochrome palette) ---- */
+  .badge-user-active {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #f8fafc;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-user-active::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .badge-user-deactivated {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: #d4d4d8;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-user-deactivated::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #71717a;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .btn-user-deactivate {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: #e4e4e7;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-user-deactivate:hover:not(:disabled) {
+    background: #27272a;
+    border-color: #52525b;
+    color: #ffffff;
+  }
+  .btn-user-deactivate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-user-activate {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #f8fafc;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-user-activate:hover:not(:disabled) {
+    background: #1e293b;
+    color: #ffffff;
+  }
+  .btn-user-activate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   .btn-action-inspect {
@@ -1865,6 +1958,70 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
     }
   };
 
+  // =========================================================
+  // REGISTERED USERS MANAGEMENT STATE & ACTIONS (SUPER ADMIN ONLY)
+  // =========================================================
+  const [usersList, setUsersList] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
+  const [userStatusFilter, setUserStatusFilter] = useState('all');
+  const [userCounts, setUserCounts] = useState({ total: 0, active: 0, deactivated: 0 });
+  const [userActionLoadingId, setUserActionLoadingId] = useState(null);
+  const [userToToggleStatus, setUserToToggleStatus] = useState(null);
+
+  const loadUsers = async (searchOverride, statusOverride) => {
+    if (!isAdmin) return;
+    setUsersLoading(true);
+    try {
+      const activeSearch = searchOverride !== undefined ? searchOverride : userSearch;
+      const activeStatus = statusOverride !== undefined ? statusOverride : userStatusFilter;
+      const res = await getAdminUsers({
+        search: activeSearch.trim() || undefined,
+        status: activeStatus !== 'all' ? activeStatus : undefined,
+      });
+      setUsersList(res.data || []);
+      if (res.counts) setUserCounts(res.counts);
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Error loading registered users.' });
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadUsers();
+    }
+  }, [userStatusFilter]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      const timer = setTimeout(() => {
+        loadUsers(userSearch, userStatusFilter);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [userSearch]);
+
+  const handleToggleUserStatus = async (targetUser) => {
+    if (!isAdmin || !targetUser) return;
+    const nextStatus = !targetUser.is_active;
+    setUserActionLoadingId(targetUser.id);
+    try {
+      await toggleUserStatus(targetUser.id, nextStatus);
+      setAlert({
+        type: 'success',
+        message: `Account for ${targetUser.name} (${targetUser.email}) has been ${nextStatus ? 'activated' : 'deactivated'} successfully.`,
+      });
+      setUserToToggleStatus(null);
+      await loadUsers();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'Could not update user account status.' });
+    } finally {
+      setUserActionLoadingId(null);
+    }
+  };
+
   useEffect(() => {
     loadFleet();
   }, [statusFilter, categoryFilter]);
@@ -2220,6 +2377,8 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                   ? 'Client Messages & Concierge Inquiries'
                   : activeTab === 'gestionnaires'
                   ? 'Staff & Gestionnaires Directory'
+                  : activeTab === 'users'
+                  ? 'Registered Users & Client Accounts'
                   : 'Fleet Management Hub'}
               </h1>
             </div>
@@ -2344,6 +2503,21 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
               <IconStaff size={15} />
               <span>Staff & Gestionnaires</span>
               <span className="admin-tab-count">{gestionnaires.length}</span>
+            </button>
+          )}
+
+          {isAdmin && (
+            <button
+              type="button"
+              className={`admin-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('users');
+                loadUsers();
+              }}
+            >
+              <IconUser size={15} />
+              <span>Users</span>
+              <span className="admin-tab-count">{userCounts.total || usersList.length}</span>
             </button>
           )}
         </nav>
@@ -2706,6 +2880,301 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                     </div>
                   </div>
                 ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================
+            VIEW: REGISTERED USERS DIRECTORY (SUPER ADMIN ONLY)
+            ========================================================= */}
+        {isAdmin && activeTab === 'users' && (
+          <div>
+            {/* Users Metrics Strip */}
+            <section className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Total Clients</h3>
+                  <span className="stat-indicator-dot dot-total"></span>
+                </div>
+                <div className="stat-number">{String(userCounts.total).padStart(2, '0')}</div>
+                <div className="stat-subtext">All Registered Member Accounts</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Active Accounts</h3>
+                  <span className="stat-indicator-dot dot-available"></span>
+                </div>
+                <div className="stat-number" style={{ color: '#0f172a' }}>
+                  {String(userCounts.active).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Authorized For Vehicle Booking</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Deactivated</h3>
+                  <span className="stat-indicator-dot dot-maintenance"></span>
+                </div>
+                <div className="stat-number" style={{ color: userCounts.deactivated > 0 ? '#0f172a' : '#64748b' }}>
+                  {String(userCounts.deactivated).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Suspended Or Locked Accounts</div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-card-header">
+                  <h3>Verified Drivers</h3>
+                  <span className="stat-indicator-dot" style={{ background: '#0f172a' }}></span>
+                </div>
+                <div className="stat-number">
+                  {String(usersList.filter((u) => u.license_uploaded).length).padStart(2, '0')}
+                </div>
+                <div className="stat-subtext">Uploaded Driver Credentials</div>
+              </div>
+            </section>
+
+            {/* Users Filter & Search Toolbar */}
+            <section className="toolbar-card">
+              <div className="res-filter-strip" style={{ marginBottom: 0 }}>
+                <button
+                  type="button"
+                  className={`res-filter-pill ${userStatusFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setUserStatusFilter('all')}
+                >
+                  All Accounts ({userCounts.total})
+                </button>
+                <button
+                  type="button"
+                  className={`res-filter-pill ${userStatusFilter === 'active' ? 'active' : ''}`}
+                  onClick={() => setUserStatusFilter('active')}
+                >
+                  Active ({userCounts.active})
+                </button>
+                <button
+                  type="button"
+                  className={`res-filter-pill ${userStatusFilter === 'deactivated' ? 'active' : ''}`}
+                  onClick={() => setUserStatusFilter('deactivated')}
+                >
+                  Deactivated ({userCounts.deactivated})
+                </button>
+              </div>
+
+              <div className="filter-group" style={{ justifyContent: 'flex-end' }}>
+                <form onSubmit={(e) => { e.preventDefault(); loadUsers(); }} className="search-input-wrap">
+                  <span className="search-icon"><IconSearch size={15} /></span>
+                  <input
+                    type="text"
+                    placeholder="Search user by name, email, phone, license..."
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                  />
+                </form>
+              </div>
+            </section>
+
+            {/* Users Table */}
+            <div className="fleet-table-container">
+              {usersLoading ? (
+                <div className="loading-fleet-container">
+                  Loading registered user accounts...
+                </div>
+              ) : usersList.length === 0 ? (
+                <div className="empty-fleet-container">
+                  <div className="empty-fleet-icon"><IconUser size={28} /></div>
+                  <h3>No Users Found</h3>
+                  <p>No registered accounts match the selected filters or search parameters.</p>
+                </div>
+              ) : (
+                <table className="fleet-table">
+                  <thead>
+                    <tr>
+                      <th>Client / User</th>
+                      <th>Contact Details</th>
+                      <th>Driver License</th>
+                      <th>Registered On</th>
+                      <th>Account Status</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usersList.map((clientUser) => {
+                      const isActive = Boolean(clientUser.is_active);
+                      const isActionBusy = userActionLoadingId === clientUser.id;
+
+                      return (
+                        <tr key={clientUser.id}>
+                          {/* Client / User */}
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div
+                                style={{
+                                  width: 38,
+                                  height: 38,
+                                  borderRadius: '50%',
+                                  background: '#0f172a',
+                                  color: '#ffffff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontWeight: 800,
+                                  fontSize: '0.9rem',
+                                  flexShrink: 0,
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                {clientUser.avatar ? (
+                                  <img
+                                    src={clientUser.avatar}
+                                    alt={clientUser.name}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  />
+                                ) : (
+                                  (clientUser.name || 'U').charAt(0).toUpperCase()
+                                )}
+                              </div>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.9rem' }}>
+                                    {clientUser.name || 'Unnamed Client'}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: '0.7rem',
+                                      fontWeight: 700,
+                                      padding: '2px 8px',
+                                      borderRadius: '4px',
+                                      background: '#f1f5f9',
+                                      color: '#475569',
+                                      border: '1px solid #e2e8f0',
+                                    }}
+                                  >
+                                    ID #{clientUser.id}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                                  {clientUser.rentals_count || 0} booking{clientUser.rentals_count === 1 ? '' : 's'} placed
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Contact Details */}
+                          <td>
+                            <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#0f172a' }}>
+                              <a
+                                href={`mailto:${clientUser.email}`}
+                                style={{ color: 'inherit', textDecoration: 'none' }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {clientUser.email}
+                              </a>
+                            </div>
+                            <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                              {clientUser.phone || 'No phone recorded'}
+                            </div>
+                            {clientUser.address && (
+                              <div
+                                style={{
+                                  fontSize: '0.72rem',
+                                  color: '#94a3b8',
+                                  marginTop: '2px',
+                                  maxWidth: '240px',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {clientUser.address}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Driver License */}
+                          <td>
+                            {clientUser.license_number ? (
+                              <div>
+                                <span
+                                  style={{
+                                    fontFamily: 'monospace',
+                                    fontWeight: 700,
+                                    fontSize: '0.84rem',
+                                    color: '#0f172a',
+                                  }}
+                                >
+                                  {clientUser.license_number}
+                                </span>
+                                {clientUser.license_expiry && (
+                                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                                    Exp: {String(clientUser.license_expiry).split('T')[0]}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                                License Not Uploaded
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Registered On */}
+                          <td>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#0f172a' }}>
+                              {new Date(clientUser.created_at).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                              {new Date(clientUser.created_at).toLocaleTimeString(undefined, {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </div>
+                          </td>
+
+                          {/* Account Status */}
+                          <td>
+                            {isActive ? (
+                              <span className="badge-user-active">Active</span>
+                            ) : (
+                              <span className="badge-user-deactivated">Deactivated</span>
+                            )}
+                          </td>
+
+                          {/* Actions */}
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                              {isActive ? (
+                                <button
+                                  type="button"
+                                  className="btn-user-deactivate"
+                                  disabled={isActionBusy}
+                                  onClick={() => setUserToToggleStatus(clientUser)}
+                                  title="Deactivate account to prevent login and bookings"
+                                >
+                                  {isActionBusy ? 'Updating...' : 'Deactivate'}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn-user-activate"
+                                  disabled={isActionBusy}
+                                  onClick={() => handleToggleUserStatus(clientUser)}
+                                  title="Reactivate client account"
+                                >
+                                  {isActionBusy ? 'Updating...' : 'Activate'}
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
@@ -4171,6 +4640,61 @@ function AdminDashboard({ user, onLogout, onBackToFleet }) {
                     <span>{msgActionLoading ? 'Saving Reply...' : 'Send & Mark as Replied'}</span>
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================
+            MODAL: CONFIRM DEACTIVATE USER ACCOUNT (SUPER ADMIN)
+            ========================================================= */}
+        {userToToggleStatus && (
+          <div className="modal-overlay" onClick={() => setUserToToggleStatus(null)}>
+            <div className="modal-card" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Deactivate User Account</h2>
+                <button type="button" className="close-modal-btn" onClick={() => setUserToToggleStatus(null)}>
+                  <IconClose size={18} />
+                </button>
+              </div>
+
+              <div style={{ padding: '8px 0 20px 0' }}>
+                <p style={{ color: '#334155', fontSize: '0.92rem', lineHeight: '1.5', margin: '0 0 16px 0' }}>
+                  Are you sure you want to deactivate the account for{' '}
+                  <strong style={{ color: '#0f172a' }}>{userToToggleStatus.name}</strong> ({userToToggleStatus.email})?
+                </p>
+                <div
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    fontSize: '0.82rem',
+                    color: '#64748b',
+                    lineHeight: '1.45',
+                  }}
+                >
+                  Deactivating this account will immediately revoke login access and prevent them from submitting new vehicle reservations. You can reactivate their account at any time.
+                </div>
+              </div>
+
+              <div className="modal-actions" style={{ marginTop: 0 }}>
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => setUserToToggleStatus(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn-user-deactivate"
+                  style={{ padding: '11px 20px' }}
+                  disabled={userActionLoadingId === userToToggleStatus.id}
+                  onClick={() => handleToggleUserStatus(userToToggleStatus)}
+                >
+                  {userActionLoadingId === userToToggleStatus.id ? 'Deactivating...' : 'Confirm Deactivation'}
+                </button>
               </div>
             </div>
           </div>
